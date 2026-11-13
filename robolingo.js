@@ -9,7 +9,6 @@ window.Robolingo = (() => {
     reading: { label: "📖 Leitura", npcName: "Mestra Clara (Livros)" }
   }
 
-  // Cada nível possui 3 formatos: 'quiz' (múltipla escolha), 'listen' (escuta pura) e 'order' (ordenar palavras)
   const QUESTIONS = {
     games: {
       1: [
@@ -755,7 +754,6 @@ window.Robolingo = (() => {
       const j = Math.floor(Math.random() * (i + 1))
       ;[copy[i], copy[j]] = [copy[j], copy[i]]
     }
-    // Evita que venha exatamente na ordem original
     if (copy.length > 1 && copy.every((item, idx) => item.originalIdx === idx)) {
       ;[copy[0], copy[1]] = [copy[1], copy[0]]
     }
@@ -1042,11 +1040,23 @@ window.Robolingo = (() => {
     } else {
       wordBuilderBox.style.display = "none"
       optionsBox.style.display = "block"
-      currentQuestion.options.forEach((opt, idx) => {
+
+      // Embaralha automaticamente as alternativas A, B e C
+      const shuffledOpts = currentQuestion.options.map((text, idx) => ({
+        text,
+        isCorrect: idx === currentQuestion.correct
+      }))
+      for (let i = shuffledOpts.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1))
+        ;[shuffledOpts[i], shuffledOpts[j]] = [shuffledOpts[j], shuffledOpts[i]]
+      }
+
+      shuffledOpts.forEach((optObj, idx) => {
         const btn = document.createElement("button")
         btn.className = "robo-option-btn"
-        btn.textContent = `${["A", "B", "C"][idx]}) ${opt}`
-        btn.onclick = () => handleQuizAnswer(idx, btn, source)
+        btn.dataset.correct = optObj.isCorrect ? "true" : "false"
+        btn.textContent = `${["A", "B", "C"][idx]}) ${optObj.text}`
+        btn.onclick = () => handleQuizAnswer(optObj.isCorrect, btn, source)
         optionsBox.appendChild(btn)
       })
     }
@@ -1055,19 +1065,18 @@ window.Robolingo = (() => {
     setTimeout(() => speakEnglish(currentQuestion.en, 0.92), 250)
   }
 
-  function handleQuizAnswer(selectedIdx, btnEl, source) {
+  function handleQuizAnswer(isCorrect, btnEl, source) {
     if (questionAnswered) return
     const allBtns = document.querySelectorAll(".robo-option-btn")
-    allBtns.forEach((b, i) => {
+    allBtns.forEach((b) => {
       b.disabled = true
-      if (i === currentQuestion.correct) {
+      if (b.dataset.correct === "true") {
         b.style.background = "#16a34a"
         b.style.color = "#fff"
         b.style.borderColor = "#bbf7d0"
       }
     })
 
-    const isCorrect = selectedIdx === currentQuestion.correct
     if (!isCorrect) {
       btnEl.style.background = "#dc2626"
       btnEl.style.color = "#fff"
@@ -1083,7 +1092,6 @@ window.Robolingo = (() => {
     const revealBtn = document.getElementById("btnRevealText")
     const checkBtn = document.getElementById("btnCheckOrder")
 
-    // Revela a frase completa ao finalizar
     enText.textContent = `"${currentQuestion.en}"`
     if (revealBtn) revealBtn.style.display = "none"
     if (checkBtn) checkBtn.disabled = true
