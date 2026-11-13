@@ -229,7 +229,6 @@
         line-height: 1.5;
       }
 
-      /* Blocos do Construtor de Frases */
       #wordBuilderTarget {
         min-height: 54px;
         background: #090d16;
@@ -298,9 +297,12 @@
         </div>
       </div>
 
-      <div style="display:flex; gap:6px; align-items:center;">
+      <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
         <div id="hudStreak" class="hud-pill" style="display:none; font-size:9px;">
           🔥 0
+        </div>
+        <div class="hud-pill" style="font-size:9px; color:#34d399;">
+          🎁 <span id="hudChests">0/5</span>
         </div>
         <div class="hud-pill" style="font-size:9px; color:#c084fc;">
           ⭐ <span id="hudXp">0 XP</span>
@@ -373,7 +375,7 @@
       <div class="robo-modal-card">
         <h2 style="font-size:14px; color:#facc15; margin-bottom:8px;">🤖 ROBOLINGO RPG</h2>
         <p style="font-size:9px; color:#94a3b8; line-height:1.5; margin-bottom:14px;">
-          Explore a vila em pixel art, fale com os mentores e aprenda inglês!
+          Explore a vila em pixel art, encontre os 7 Mentores e abra os 5 Baús secretos!
         </p>
 
         <label style="font-size:9px; color:#e2e8f0;">Seu Nome ou Apelido:</label>
@@ -419,7 +421,7 @@
       </div>
     </div>
 
-    <!-- Modal 2: Missão de Inglês (Quiz, Escuta Pura e Construtor de Frases) -->
+    <!-- Modal 2: Missão de Inglês -->
     <div id="missionModal" class="robo-modal-overlay">
       <div class="robo-modal-card">
         <div
@@ -508,10 +510,8 @@
           style="font-size: 10px; color: #f8fafc; line-height: 1.5; margin-bottom: 12px;"
         ></p>
 
-        <!-- Modo Quiz / Escuta -->
         <div id="missionOptions"></div>
 
-        <!-- Modo Construtor de Frases -->
         <div id="wordBuilderContainer" style="display: none">
           <div id="wordBuilderTarget"></div>
           <div id="wordBuilderBank"></div>
@@ -544,7 +544,7 @@
       </div>
     </div>
 
-    <!-- Modal 3: EduShop -->
+    <!-- Modal 3: EduShop (Acessórios + Pets) -->
     <div id="shopModal" class="robo-modal-overlay">
       <div class="robo-modal-card">
         <div
@@ -590,6 +590,84 @@
           </button>
         </div>
         <div id="rankingList"></div>
+      </div>
+    </div>
+
+    <!-- Modal 5: Baú de Vocabulário -->
+    <div id="chestModal" class="robo-modal-overlay">
+      <div class="robo-modal-card" style="border-color:#facc15;">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+          "
+        >
+          <h2 style="font-size:12px; color:#facc15;">🎁 BAÚ DO VOCABULÁRIO</h2>
+          <button
+            onclick="Robolingo.closeAllModals()"
+            style="background:#334155; color:#fff; padding:6px 10px; border-radius:6px; font-size:9px;"
+          >
+            ✕ Fechar
+          </button>
+        </div>
+
+        <div
+          id="chestRewardBanner"
+          style="
+            padding: 8px;
+            border: 2px solid #22c55e;
+            border-radius: 8px;
+            font-size: 9px;
+            line-height: 1.5;
+            margin-bottom: 12px;
+          "
+        ></div>
+
+        <div
+          style="
+            background: #1e293b;
+            border: 2px solid #facc15;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 12px;
+          "
+        >
+          <div
+            id="chestWord"
+            style="font-size: 13px; color: #facc15; margin-bottom: 8px;"
+          ></div>
+          <div
+            id="chestMeaning"
+            style="font-size: 10px; color: #38bdf8; margin-bottom: 8px;"
+          ></div>
+          <div
+            id="chestExample"
+            style="font-size: 9px; color: #e2e8f0; line-height: 1.5; margin-bottom: 10px;"
+          ></div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button
+              onclick="Robolingo.speakChestWord()"
+              class="robo-mini-btn"
+              style="background:#0284c7;"
+            >
+              🔊 Ouvir Expressão
+            </button>
+            <button
+              onclick="Robolingo.speakChestExample()"
+              class="robo-mini-btn"
+              style="background:#475569;"
+            >
+              🗣️ Ouvir Exemplo
+            </button>
+          </div>
+        </div>
+
+        <p
+          id="chestTip"
+          style="font-size: 9px; color: #cbd5e1; line-height: 1.5;"
+        ></p>
       </div>
     </div>
 
