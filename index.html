@@ -1,200 +1,539 @@
-<head>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
-    rel="stylesheet"
-  />
-  <style>
-    * {
-      font-family: 'Press Start 2P', cursive;
-      box-sizing: border-box;
-    }
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Robolingo RPG • Aventura em Inglês</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        font-family: 'Press Start 2P', cursive;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
 
-    body {
-      background-color: black;
-    }
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #090d16;
+        color: #f8fafc;
+        overflow: hidden;
+        touch-action: manipulation;
+      }
 
-    h1 {
-      margin: 0;
-    }
+      h1, h2, p {
+        margin: 0;
+      }
 
-    button {
-      border: 0;
-      cursor: pointer;
-      font-size: 16px;
-    }
+      button {
+        border: 0;
+        cursor: pointer;
+        font-size: 11px;
+      }
 
-    button:hover {
-      background-color: #ddd;
-    }
-  </style>
-</head>
+      /* Barra Superior do Aluno */
+      #topHud {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        z-index: 30;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        pointer-events: none;
+      }
 
-<div style="display: inline-block; position: relative">
-  <div
-    id="overlappingDiv"
-    style="
-      background-color: black;
-      position: absolute;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      left: 0;
-      opacity: 0;
-      pointer-events: none;
-      z-index: 10;
-    "
-  ></div>
+      .hud-pill {
+        pointer-events: auto;
+        background: rgba(15, 23, 42, 0.92);
+        border: 2px solid #334155;
+        border-radius: 10px;
+        padding: 8px 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+      }
 
-  <canvas></canvas>
-  <div
-    id="characterDialogueBox"
-    style="
-      background-color: white;
-      height: 140px;
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      border-top: 4px black solid;
-      display: none;
-      padding: 12px;
-    "
-  ></div>
+      /* Área do Mapa Pixel Art */
+      #gameViewport {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
 
-  <div id="userInterface" style="display: none">
-    <!-- Represents health bar of draggle (enemy) -->
-    <div
-      style="
-        background-color: white;
-        width: 250px;
-        position: absolute;
-        top: 50px;
-        left: 50px;
-        border: 4px black solid;
-        padding: 12px;
-      "
-    >
-      <h1 style="font-size: 16px">Draggle</h1>
-      <div style="position: relative">
-        <div
-          style="height: 5px; background-color: #ccc; margin-top: 10px"
-        ></div>
-        <div
-          id="enemyHealthBar"
-          style="
-            height: 5px;
-            background-color: green;
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-          "
-        ></div>
-      </div>
-    </div>
+      #canvasWrapper {
+        position: relative;
+        width: 100%;
+        max-width: 1024px;
+        aspect-ratio: 16 / 9;
+        max-height: 100vh;
+        border: 3px solid #1e293b;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+      }
 
-    <!-- Represents health bar of emby (us) -->
-    <div
-      style="
-        background-color: white;
-        width: 250px;
-        position: absolute;
-        top: 330px;
-        right: 50px;
-        border: 4px black solid;
-        padding: 12px;
-      "
-    >
-      <h1 style="font-size: 16px">Emby</h1>
-      <div style="position: relative">
-        <div
-          style="height: 5px; background-color: #ccc; margin-top: 10px"
-        ></div>
-        <div
-          id="playerHealthBar"
-          style="
-            height: 5px;
-            background-color: green;
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-          "
-        ></div>
-      </div>
-    </div>
+      canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+        image-rendering: pixelated;
+      }
 
-    <div
-      style="
-        background-color: white;
-        height: 140px;
+      /* Caixa de diálogo dos NPCs no mapa */
+      #characterDialogueBox {
+        background-color: #ffffff;
+        color: #0f172a;
+        min-height: 92px;
         position: absolute;
         bottom: 0;
         left: 0;
         right: 0;
-        border-top: 4px black solid;
+        border-top: 4px solid #0f172a;
+        display: none;
+        align-items: center;
+        padding: 14px;
+        font-size: 11px;
+        line-height: 1.6;
+        z-index: 15;
+      }
+
+      /* Menu Inferior de Ações */
+      #bottomMenu {
+        position: fixed;
+        bottom: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 30;
         display: flex;
-      "
-    >
-      <div
-        id="dialogueBox"
-        style="
-          position: absolute;
-          top: 0;
-          right: 0;
-          bottom: 0;
-          left: 0;
-          background-color: white;
-          padding: 12px;
-          display: none;
-          cursor: pointer;
-        "
-      >
-        sdkfjlsdajl
+        gap: 8px;
+      }
+
+      .menu-btn {
+        padding: 10px 12px;
+        border-radius: 10px;
+        color: #fff;
+        font-size: 10px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      }
+
+      /* Controles Táteis (D-Pad + Botão Falar) */
+      #touchDpad {
+        position: fixed;
+        bottom: 64px;
+        left: 16px;
+        z-index: 30;
+        display: grid;
+        grid-template-columns: repeat(3, 46px);
+        grid-template-rows: repeat(3, 46px);
+        gap: 4px;
+        user-select: none;
+      }
+
+      .dpad-btn {
+        background: rgba(30, 41, 59, 0.82);
+        color: #f8fafc;
+        border: 2px solid #64748b;
+        border-radius: 10px;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        touch-action: none;
+      }
+
+      .dpad-btn:active {
+        background: #3b82f6;
+      }
+
+      #btnMobileAction {
+        position: fixed;
+        bottom: 84px;
+        right: 18px;
+        z-index: 30;
+        width: 76px;
+        height: 76px;
+        border-radius: 50%;
+        background: rgba(22, 163, 74, 0.9);
+        color: #fff;
+        border: 3px solid #bbf7d0;
+        font-size: 10px;
+        line-height: 1.4;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+        touch-action: none;
+      }
+
+      #btnMobileAction:active {
+        transform: scale(0.94);
+      }
+
+      /* Modais do Robolingo */
+      .robo-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(2, 6, 23, 0.86);
+        z-index: 50;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 14px;
+      }
+
+      .robo-modal-card {
+        background: #0f172a;
+        border: 3px solid #38bdf8;
+        border-radius: 14px;
+        width: 100%;
+        max-width: 480px;
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 18px;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.75);
+      }
+
+      .robo-input, .robo-select {
+        width: 100%;
+        padding: 10px;
+        margin-top: 6px;
+        margin-bottom: 14px;
+        background: #1e293b;
+        color: #f8fafc;
+        border: 2px solid #475569;
+        border-radius: 8px;
+        font-size: 10px;
+      }
+
+      .robo-option-btn {
+        width: 100%;
+        text-align: left;
+        padding: 12px;
+        margin-bottom: 8px;
+        background: #1e293b;
+        color: #f8fafc;
+        border: 2px solid #475569;
+        border-radius: 8px;
+        font-size: 10px;
+        line-height: 1.5;
+      }
+
+      .robo-shop-card, .robo-rank-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        margin-bottom: 8px;
+        background: #1e293b;
+        border: 2px solid #334155;
+        border-radius: 8px;
+      }
+
+      .robo-mini-btn {
+        padding: 8px 10px;
+        border-radius: 8px;
+        color: #fff;
+        font-size: 9px;
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- HUD Superior -->
+    <div id="topHud">
+      <div class="hud-pill" onclick="Robolingo.openLoginModal()" style="cursor:pointer;">
+        <div>
+          <div id="hudPlayerName" style="font-size:11px; color:#facc15;">Explorador</div>
+          <div id="hudPlayerMeta" style="font-size:8px; color:#38bdf8; margin-top:4px;">
+            Nv.1 • 🎮 Games & Tech
+          </div>
+        </div>
       </div>
-      <div
-        id="attacksBox"
-        style="
-          width: 66.66%;
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-        "
-      ></div>
-      <div
-        style="
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 33.33%;
-          border-left: 4px black solid;
-        "
-      >
-        <h1 id="attackType" style="font-size: 16px">Attack Type</h1>
+
+      <div style="display:flex; gap:6px;">
+        <div class="hud-pill" style="font-size:10px; color:#c084fc;">
+          ⭐ <span id="hudXp">0 XP</span>
+        </div>
+        <div class="hud-pill" style="font-size:10px; color:#facc15;">
+          🪙 <span id="hudCoins">20</span>
+        </div>
       </div>
     </div>
-  </div>
-</div>
-<script
-  src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"
-  integrity="sha512-6+YN/9o9BWrk6wSfGxQGpt3EUK6XeHi6yeHV+TYD2GR0Sj/cggRpXr1BrAQf0as6XslxomMUxXp2vIl+fv0QRA=="
-  crossorigin="anonymous"
-  referrerpolicy="no-referrer"
-></script>
-<script
-  src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"
-  integrity="sha512-H6cPm97FAsgIKmlBA4s774vqoN24V5gSQL4yBTDOY2su2DeXZVhQPxFK4P6GPdnZqM9fg1G3cMv5wD7e6cFLZQ=="
-  crossorigin="anonymous"
-  referrerpolicy="no-referrer"
-></script>
-<script src="data/audio.js"></script>
-<script src="data/battleZones.js"></script>
-<script src="data/collisions.js"></script>
-<script src="data/attacks.js"></script>
-<script src="data/monsters.js"></script>
-<script src="data/characters.js"></script>
-<script src="js/utils.js"></script>
-<script src="classes.js"></script>
-<script src="index.js"></script>
-<script src="battleScene.js"></script>
+
+    <!-- Mundo Pixel Art -->
+    <div id="gameViewport">
+      <div id="canvasWrapper">
+        <div
+          id="overlappingDiv"
+          style="
+            background-color: black;
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 10;
+          "
+        ></div>
+
+        <canvas></canvas>
+        <div id="characterDialogueBox"></div>
+
+        <!-- Elementos originais mantidos ocultos para compatibilidade -->
+        <div id="userInterface" style="display: none">
+          <div id="enemyHealthBar"></div>
+          <div id="playerHealthBar"></div>
+          <div id="dialogueBox"></div>
+          <div id="attacksBox"></div>
+          <h1 id="attackType"></h1>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controles Táteis no Celular -->
+    <div id="touchDpad">
+      <div></div>
+      <button class="dpad-btn" data-dir="w">▲</button>
+      <div></div>
+      <button class="dpad-btn" data-dir="a">◀</button>
+      <div></div>
+      <button class="dpad-btn" data-dir="d">▶</button>
+      <div></div>
+      <button class="dpad-btn" data-dir="s">▼</button>
+      <div></div>
+    </div>
+
+    <button id="btnMobileAction">💬<br />Falar</button>
+
+    <!-- Menu Inferior -->
+    <div id="bottomMenu">
+      <button class="menu-btn" style="background:#16a34a;" onclick="Robolingo.openMission('hud')">
+        🎯 Missão
+      </button>
+      <button class="menu-btn" style="background:#2563eb;" onclick="Robolingo.openShop()">
+        🛒 Loja
+      </button>
+      <button class="menu-btn" style="background:#d97706;" onclick="Robolingo.openRanking()">
+        🏆 Ranking
+      </button>
+    </div>
+
+    <!-- Modal 1: Perfil do Aluno -->
+    <div id="loginModal" class="robo-modal-overlay">
+      <div class="robo-modal-card">
+        <h2 style="font-size:14px; color:#facc15; margin-bottom:8px;">🤖 ROBOLINGO RPG</h2>
+        <p style="font-size:9px; color:#94a3b8; line-height:1.5; margin-bottom:14px;">
+          Explore a vila em pixel art, fale com os mentores e aprenda inglês!
+        </p>
+
+        <label style="font-size:9px; color:#e2e8f0;">Seu Nome ou Apelido:</label>
+        <input
+          id="inputStudentName"
+          class="robo-input"
+          type="text"
+          maxlength="16"
+          placeholder="Ex: Son"
+        />
+
+        <label style="font-size:9px; color:#e2e8f0;">Seu Tema Favorito:</label>
+        <select id="selectStudentTheme" class="robo-select">
+          <option value="games">🎮 Games & Tecnologia</option>
+          <option value="manga">📚 HQs & Mangá</option>
+          <option value="cooking">🍔 Culinária & Comida</option>
+          <option value="fashion">👟 Moda & Estilo</option>
+          <option value="science">🔬 Ciências & Espaço</option>
+          <option value="movies">🎬 Filmes & Séries</option>
+          <option value="reading">📖 Leitura & Aventuras</option>
+        </select>
+
+        <label style="font-size:9px; color:#e2e8f0;">Nível de Inglês:</label>
+        <select id="selectStudentLevel" class="robo-select">
+          <option value="1">Nível 1 • Iniciante</option>
+          <option value="2">Nível 2 • Explorador</option>
+          <option value="3">Nível 3 • Mestre</option>
+        </select>
+
+        <button
+          onclick="Robolingo.submitLogin()"
+          style="
+            width: 100%;
+            padding: 13px;
+            background: #16a34a;
+            color: #fff;
+            border-radius: 10px;
+            font-size: 11px;
+          "
+        >
+          ▶ ENTRAR NA VILA
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal 2: Missão de Inglês com Áudio -->
+    <div id="missionModal" class="robo-modal-overlay">
+      <div class="robo-modal-card">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            gap: 8px;
+          "
+        >
+          <span
+            id="missionSourceBadge"
+            style="
+              font-size: 8px;
+              padding: 6px 8px;
+              border-radius: 6px;
+              background: #1d4ed8;
+              color: #fff;
+            "
+            >🎯 MISSÃO</span
+          >
+          <button
+            onclick="Robolingo.closeAllModals()"
+            style="background:#334155; color:#fff; padding:6px 10px; border-radius:6px; font-size:9px;"
+          >
+            ✕ Fechar
+          </button>
+        </div>
+
+        <div
+          style="
+            background: #1e293b;
+            border: 2px solid #38bdf8;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 12px;
+          "
+        >
+          <div
+            id="missionEnText"
+            style="font-size: 11px; color: #facc15; line-height: 1.6; margin-bottom: 10px;"
+          ></div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button
+              onclick="Robolingo.speakCurrent()"
+              class="robo-mini-btn"
+              style="background:#0284c7;"
+            >
+              🔊 Ouvir (Normal)
+            </button>
+            <button
+              onclick="Robolingo.speakSlow()"
+              class="robo-mini-btn"
+              style="background:#475569;"
+            >
+              🐢 Ouvir Devagar
+            </button>
+          </div>
+        </div>
+
+        <p
+          id="missionPtText"
+          style="font-size: 10px; color: #f8fafc; line-height: 1.5; margin-bottom: 12px;"
+        ></p>
+
+        <div id="missionOptions"></div>
+
+        <div
+          id="missionFeedback"
+          style="
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            border: 2px solid #22c55e;
+            border-radius: 8px;
+            font-size: 10px;
+          "
+        ></div>
+      </div>
+    </div>
+
+    <!-- Modal 3: EduShop -->
+    <div id="shopModal" class="robo-modal-overlay">
+      <div class="robo-modal-card">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+          "
+        >
+          <h2 style="font-size:13px; color:#38bdf8;">🛒 EDUSHOP</h2>
+          <button
+            onclick="Robolingo.closeAllModals()"
+            style="background:#334155; color:#fff; padding:6px 10px; border-radius:6px; font-size:9px;"
+          >
+            ✕ Fechar
+          </button>
+        </div>
+        <p id="shopBalance" style="font-size:10px; color:#facc15; margin-bottom:12px;">
+          Saldo: 🪙 20 EduCoins
+        </p>
+        <div id="shopItemsList"></div>
+      </div>
+    </div>
+
+    <!-- Modal 4: Ranking da Turma -->
+    <div id="rankModal" class="robo-modal-overlay">
+      <div class="robo-modal-card">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+          "
+        >
+          <h2 style="font-size:13px; color:#facc15;">🏆 RANKING</h2>
+          <button
+            onclick="Robolingo.closeAllModals()"
+            style="background:#334155; color:#fff; padding:6px 10px; border-radius:6px; font-size:9px;"
+          >
+            ✕ Fechar
+          </button>
+        </div>
+        <div id="rankingList"></div>
+      </div>
+    </div>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"
+      integrity="sha512-6+YN/9o9BWrk6wSfGxQGpt3EUK6XeHi6yeHV+TYD2GR0Sj/cggRpXr1BrAQf0as6XslxomMUxXp2vIl+fv0QRA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"
+      integrity="sha512-H6cPm97FAsgIKmlBA4s774vqoN24V5gSQL4yBTDOY2su2DeXZVhQPxFK4P6GPdnZqM9fg1G3cMv5wD7e6cFLZQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script src="data/audio.js"></script>
+    <script src="data/battleZones.js"></script>
+    <script src="data/collisions.js"></script>
+    <script src="data/attacks.js"></script>
+    <script src="data/monsters.js"></script>
+    <script src="data/characters.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="classes.js"></script>
+    <script src="robolingo.js"></script>
+    <script src="index.js"></script>
+    <script src="battleScene.js"></script>
+  </body>
+</html>

@@ -18,7 +18,6 @@ const charactersMap = []
 for (let i = 0; i < charactersMapData.length; i += 70) {
   charactersMap.push(charactersMapData.slice(i, 70 + i))
 }
-console.log(charactersMap)
 
 const boundaries = []
 const offset = {
@@ -41,7 +40,6 @@ collisionsMap.forEach((row, i) => {
 })
 
 const battleZones = []
-
 battleZonesMap.forEach((row, i) => {
   row.forEach((symbol, j) => {
     if (symbol === 1025)
@@ -65,7 +63,7 @@ oldManImg.src = './img/oldMan/Idle.png'
 
 charactersMap.forEach((row, i) => {
   row.forEach((symbol, j) => {
-    // 1026 === villager
+    // 1026 === Mentor da Vila
     if (symbol === 1026) {
       characters.push(
         new Character({
@@ -80,11 +78,14 @@ charactersMap.forEach((row, i) => {
           },
           scale: 3,
           animate: true,
-          dialogue: ['...', 'Hey mister, have you seen my Doggochu?']
+          dialogue: [
+            'Welcome to Robolingo Village!',
+            'Press Space or tap Falar again to start your English Mission!'
+          ]
         })
       )
     }
-    // 1031 === oldMan
+    // 1031 === Sábio do Vocabulário
     else if (symbol === 1031) {
       characters.push(
         new Character({
@@ -98,7 +99,10 @@ charactersMap.forEach((row, i) => {
             hold: 60
           },
           scale: 3,
-          dialogue: ['My bones hurt.']
+          dialogue: [
+            'Practice English every day to earn EduCoins!',
+            'Ready for a challenge? Let us begin!'
+          ]
         })
       )
     }
@@ -169,18 +173,10 @@ const foreground = new Sprite({
 })
 
 const keys = {
-  w: {
-    pressed: false
-  },
-  a: {
-    pressed: false
-  },
-  s: {
-    pressed: false
-  },
-  d: {
-    pressed: false
-  }
+  w: { pressed: false },
+  a: { pressed: false },
+  s: { pressed: false },
+  d: { pressed: false }
 }
 
 const movables = [
@@ -190,6 +186,7 @@ const movables = [
   ...battleZones,
   ...characters
 ]
+
 const renderables = [
   background,
   ...boundaries,
@@ -203,18 +200,46 @@ const battle = {
   initiated: false
 }
 
+window.lastKey = ''
+
+function drawNpcMarkers() {
+  characters.forEach((char) => {
+    c.save()
+    c.fillStyle = '#facc15'
+    c.strokeStyle = '#0f172a'
+    c.lineWidth = 3
+    c.beginPath()
+    c.arc(char.position.x + 24, char.position.y - 14, 11, 0, Math.PI * 2)
+    c.fill()
+    c.stroke()
+    c.fillStyle = '#0f172a'
+    c.font = 'bold 11px "Press Start 2P", monospace'
+    c.fillText('!', char.position.x + 19, char.position.y - 9)
+    c.restore()
+  })
+}
+
 function animate() {
-  const animationId = window.requestAnimationFrame(animate)
+  window.requestAnimationFrame(animate)
+
   renderables.forEach((renderable) => {
     renderable.draw()
   })
 
+  drawNpcMarkers()
+
+  if (window.Robolingo) {
+    window.Robolingo.drawPlayerCosmetics(c, player)
+  }
+
   let moving = true
   player.animate = false
 
-  if (battle.initiated) return
+  if (battle.initiated || (window.Robolingo && window.Robolingo.isModalOpen())) {
+    return
+  }
 
-  // activate a battle
+  // Encontro surpresa de inglês ao andar na grama alta
   if (keys.w.pressed || keys.a.pressed || keys.s.pressed || keys.d.pressed) {
     for (let i = 0; i < battleZones.length; i++) {
       const battleZone = battleZones[i]
@@ -229,41 +254,36 @@ function animate() {
           battleZone.position.y + battleZone.height
         ) -
           Math.max(player.position.y, battleZone.position.y))
+
       if (
         rectangularCollision({
           rectangle1: player,
           rectangle2: battleZone
         }) &&
         overlappingArea > (player.width * player.height) / 2 &&
-        Math.random() < 0.01
+        Math.random() < 0.012
       ) {
-        // deactivate current animation loop
-        window.cancelAnimationFrame(animationId)
-
-        audio.Map.stop()
-        audio.initBattle.play()
-        audio.battle.play()
-
         battle.initiated = true
+        keys.w.pressed = false
+        keys.a.pressed = false
+        keys.s.pressed = false
+        keys.d.pressed = false
+
         gsap.to('#overlappingDiv', {
           opacity: 1,
-          repeat: 3,
+          repeat: 2,
           yoyo: true,
-          duration: 0.4,
+          duration: 0.25,
           onComplete() {
             gsap.to('#overlappingDiv', {
-              opacity: 1,
-              duration: 0.4,
-              onComplete() {
-                // activate a new animation loop
-                initBattle()
-                animateBattle()
-                gsap.to('#overlappingDiv', {
-                  opacity: 0,
-                  duration: 0.4
-                })
-              }
+              opacity: 0,
+              duration: 0.25
             })
+            if (window.Robolingo) {
+              window.Robolingo.openMission('grass')
+            } else {
+              battle.initiated = false
+            }
           }
         })
         break
@@ -271,7 +291,7 @@ function animate() {
     }
   }
 
-  if (keys.w.pressed && lastKey === 'w') {
+  if (keys.w.pressed && window.lastKey === 'w') {
     player.animate = true
     player.image = player.sprites.up
 
@@ -304,7 +324,7 @@ function animate() {
       movables.forEach((movable) => {
         movable.position.y += 3
       })
-  } else if (keys.a.pressed && lastKey === 'a') {
+  } else if (keys.a.pressed && window.lastKey === 'a') {
     player.animate = true
     player.image = player.sprites.left
 
@@ -337,7 +357,7 @@ function animate() {
       movables.forEach((movable) => {
         movable.position.x += 3
       })
-  } else if (keys.s.pressed && lastKey === 's') {
+  } else if (keys.s.pressed && window.lastKey === 's') {
     player.animate = true
     player.image = player.sprites.down
 
@@ -370,7 +390,7 @@ function animate() {
       movables.forEach((movable) => {
         movable.position.y -= 3
       })
-  } else if (keys.d.pressed && lastKey === 'd') {
+  } else if (keys.d.pressed && window.lastKey === 'd') {
     player.animate = true
     player.image = player.sprites.right
 
@@ -405,75 +425,100 @@ function animate() {
       })
   }
 }
-// animate()
 
-let lastKey = ''
-window.addEventListener('keydown', (e) => {
+window.triggerInteraction = function () {
+  if (window.Robolingo && window.Robolingo.isModalOpen()) return
+
   if (player.isInteracting) {
-    switch (e.key) {
-      case ' ':
-        player.interactionAsset.dialogueIndex++
+    player.interactionAsset.dialogueIndex++
+    const { dialogueIndex, dialogue } = player.interactionAsset
+    if (dialogueIndex <= dialogue.length - 1) {
+      document.querySelector('#characterDialogueBox').innerHTML =
+        player.interactionAsset.dialogue[dialogueIndex]
+      return
+    }
 
-        const { dialogueIndex, dialogue } = player.interactionAsset
-        if (dialogueIndex <= dialogue.length - 1) {
-          document.querySelector('#characterDialogueBox').innerHTML =
-            player.interactionAsset.dialogue[dialogueIndex]
-          return
-        }
-
-        // finish conversation
-        player.isInteracting = false
-        player.interactionAsset.dialogueIndex = 0
-        document.querySelector('#characterDialogueBox').style.display = 'none'
-
-        break
+    // Fim do diálogo: abre automaticamente a missão de inglês do Mentor
+    player.isInteracting = false
+    player.interactionAsset.dialogueIndex = 0
+    document.querySelector('#characterDialogueBox').style.display = 'none'
+    if (window.Robolingo) {
+      window.Robolingo.openMission('npc')
     }
     return
   }
 
-  switch (e.key) {
-    case ' ':
-      if (!player.interactionAsset) return
+  if (!player.interactionAsset) {
+    // Se não estiver encostado em um NPC, abre a missão rápida
+    if (window.Robolingo) {
+      window.Robolingo.openMission('hud')
+    }
+    return
+  }
 
-      // beginning the conversation
-      const firstMessage = player.interactionAsset.dialogue[0]
-      document.querySelector('#characterDialogueBox').innerHTML = firstMessage
-      document.querySelector('#characterDialogueBox').style.display = 'flex'
-      player.isInteracting = true
+  if (window.Robolingo) {
+    player.interactionAsset.dialogue = window.Robolingo.getNpcGreeting()
+  }
+
+  const firstMessage = player.interactionAsset.dialogue[0]
+  document.querySelector('#characterDialogueBox').innerHTML = firstMessage
+  document.querySelector('#characterDialogueBox').style.display = 'flex'
+  player.isInteracting = true
+}
+
+window.addEventListener('keydown', (e) => {
+  if (window.Robolingo && window.Robolingo.isModalOpen()) return
+
+  if (player.isInteracting) {
+    if (e.key === ' ') {
+      window.triggerInteraction()
+    }
+    return
+  }
+
+  switch (e.key.toLowerCase()) {
+    case ' ':
+      window.triggerInteraction()
       break
     case 'w':
+    case 'arrowup':
       keys.w.pressed = true
-      lastKey = 'w'
+      window.lastKey = 'w'
       break
     case 'a':
+    case 'arrowleft':
       keys.a.pressed = true
-      lastKey = 'a'
+      window.lastKey = 'a'
       break
-
     case 's':
+    case 'arrowdown':
       keys.s.pressed = true
-      lastKey = 's'
+      window.lastKey = 's'
       break
-
     case 'd':
+    case 'arrowright':
       keys.d.pressed = true
-      lastKey = 'd'
+      window.lastKey = 'd'
       break
   }
 })
 
 window.addEventListener('keyup', (e) => {
-  switch (e.key) {
+  switch (e.key.toLowerCase()) {
     case 'w':
+    case 'arrowup':
       keys.w.pressed = false
       break
     case 'a':
+    case 'arrowleft':
       keys.a.pressed = false
       break
     case 's':
+    case 'arrowdown':
       keys.s.pressed = false
       break
     case 'd':
+    case 'arrowright':
       keys.d.pressed = false
       break
   }
@@ -482,7 +527,13 @@ window.addEventListener('keyup', (e) => {
 let clicked = false
 addEventListener('click', () => {
   if (!clicked) {
-    audio.Map.play()
+    if (typeof audio !== 'undefined' && audio.Map) {
+      audio.Map.play()
+    }
     clicked = true
   }
 })
+
+if (window.Robolingo) {
+  window.Robolingo.init()
+}
