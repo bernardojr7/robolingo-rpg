@@ -1,348 +1,733 @@
 window.Robolingo = (() => {
   const THEMES = {
-    games: { label: '🎮 Games & Tech', npcName: 'Mentor Axel (Games)' },
-    manga: { label: '📚 HQs & Mangá', npcName: 'Sensei Kenji (Mangá)' },
-    cooking: { label: '🍔 Culinária', npcName: 'Chef Mia (Culinária)' },
-    fashion: { label: '👟 Moda & Estilo', npcName: 'Stylist Chloe (Moda)' },
-    science: { label: '🔬 Ciências', npcName: 'Dr. Nova (Ciências)' },
-    movies: { label: '🎬 Filmes & Séries', npcName: 'Diretor Leo (Cinema)' },
-    reading: { label: '📖 Leitura', npcName: 'Mestra Clara (Livros)' }
+    games: { label: "🎮 Games & Tech", npcName: "Mentor Axel (Games)" },
+    manga: { label: "📚 HQs & Mangá", npcName: "Sensei Kenji (Mangá)" },
+    cooking: { label: "🍔 Culinária", npcName: "Chef Mia (Culinária)" },
+    fashion: { label: "👟 Moda & Estilo", npcName: "Stylist Chloe (Moda)" },
+    science: { label: "🔬 Ciências", npcName: "Dr. Nova (Ciências)" },
+    movies: { label: "🎬 Filmes & Séries", npcName: "Diretor Leo (Cinema)" },
+    reading: { label: "📖 Leitura", npcName: "Mestra Clara (Livros)" }
   }
 
+  // Cada nível possui 3 formatos: 'quiz' (múltipla escolha), 'listen' (escuta pura) e 'order' (ordenar palavras)
   const QUESTIONS = {
     games: {
       1: [
         {
-          en: 'Press start to begin your new quest!',
+          type: "quiz",
+          en: "Press start to begin your new quest!",
           pt: "O que significa 'new quest' na frase acima?",
-          options: ['Nova missão', 'Novo controle', 'Tela pausada'],
+          options: ["Nova missão", "Novo controle", "Tela pausada"],
           correct: 0,
           tip: "'Quest' é muito usado em RPGs para significar missão ou jornada."
         },
         {
-          en: 'Collect the golden coins to unlock the next level.',
-          pt: "Qual é o objetivo da frase em inglês?",
+          type: "listen",
+          en: "Collect the golden coins to unlock the next level.",
+          pt: "Ouça o áudio e responda: qual é o objetivo da frase?",
           options: [
-            'Coletar moedas douradas para desbloquear o próximo nível',
-            'Vender a espada antes da batalha',
-            'Salvar o jogo e sair'
+            "Coletar moedas douradas para desbloquear o próximo nível",
+            "Vender a espada antes da batalha",
+            "Salvar o jogo e desligar"
           ],
           correct: 0,
           tip: "'Unlock' = desbloquear | 'Next level' = próximo nível."
+        },
+        {
+          type: "order",
+          en: "Find the secret key inside the castle.",
+          pt: "Monte a frase: 'Encontre a chave secreta dentro do castelo.'",
+          words: ["Find", "the secret key", "inside", "the castle."],
+          tip: "'Inside' significa dentro."
         }
       ],
       2: [
         {
-          en: 'Your character needs more stamina before crossing the river.',
+          type: "quiz",
+          en: "Your character needs more stamina before crossing the river.",
           pt: "Por que o personagem deve esperar antes de atravessar o rio?",
           options: [
-            'Precisa de mais energia/vigor (stamina)',
-            'Perdeu o mapa da vila',
-            'Está sem moedas na mochila'
+            "Precisa de mais energia/vigor (stamina)",
+            "Perdeu o mapa da vila",
+            "Está sem moedas na mochila"
           ],
           correct: 0,
           tip: "'Stamina' indica fôlego ou energia para correr e agir."
+        },
+        {
+          type: "listen",
+          en: "Upgrade your shield before entering the dark cave.",
+          pt: "Ouça com atenção: o que você deve melhorar antes de entrar na caverna?",
+          options: [
+            "Seu escudo (shield)",
+            "Sua bota de corrida",
+            "Seu capacete de ferro"
+          ],
+          correct: 0,
+          tip: "'Upgrade' = melhorar/aprimorar | 'Shield' = escudo."
+        },
+        {
+          type: "order",
+          en: "We defeated the dragon and saved the village.",
+          pt: "Monte a frase: 'Nós derrotamos o dragão e salvamos a vila.'",
+          words: ["We defeated", "the dragon", "and saved", "the village."],
+          tip: "Verbos no passado regular terminam em -ed (defeated, saved)."
         }
       ],
       3: [
         {
-          en: 'Although the boss looked invincible, we discovered its weak spot.',
+          type: "quiz",
+          en: "Although the boss looked invincible, we discovered its weak spot.",
           pt: "Qual é a ideia principal dessa frase?",
           options: [
-            'Embora o chefe parecesse invencível, descobrimos seu ponto fraco',
-            'O chefe fugiu antes da batalha começar',
-            'Precisamos reiniciar a fase desde o início'
+            "Embora o chefe parecesse invencível, descobrimos seu ponto fraco",
+            "O chefe fugiu antes da batalha começar",
+            "Precisamos reiniciar a fase desde o início"
           ],
           correct: 0,
           tip: "'Although' = embora | 'Weak spot' = ponto fraco."
+        },
+        {
+          type: "listen",
+          en: "Multiplayer games require teamwork and quick communication.",
+          pt: "Ouça o áudio: o que jogos multiplayer exigem?",
+          options: [
+            "Trabalho em equipe e comunicação rápida",
+            "Apenas gráficos ultra realistas",
+            "Jogar sozinho sem conexão"
+          ],
+          correct: 0,
+          tip: "'Require' = exigem/requerem | 'Teamwork' = trabalho em equipe."
+        },
+        {
+          type: "order",
+          en: "Strategy is more important than speed in this mission.",
+          pt: "Monte a frase: 'Estratégia é mais importante que velocidade nesta missão.'",
+          words: ["Strategy is", "more important", "than speed", "in this mission."],
+          tip: "Para comparar adjetivos longos, usamos 'more ... than'."
         }
       ]
     },
     manga: {
       1: [
         {
-          en: 'The young hero trains every morning to protect the village.',
+          type: "quiz",
+          en: "The young hero trains every morning to protect the village.",
           pt: "O que o jovem herói faz todas as manhãs?",
           options: [
-            'Treina para proteger a vila',
-            'Dorme até o meio-dia',
-            'Viaja de trem para a capital'
+            "Treina para proteger a vila",
+            "Dorme até o meio-dia",
+            "Viaja de trem para a capital"
           ],
           correct: 0,
           tip: "'Every morning' = todas as manhãs | 'Protect' = proteger."
         },
         {
-          en: 'Read the speech bubble from right to left!',
-          pt: "O que 'speech bubble' significa nos mangás?",
-          options: ['Balão de fala', 'Capa colorida', 'Capítulo final'],
+          type: "listen",
+          en: "Read the speech bubble from right to left!",
+          pt: "Ouça a dica de leitura: em qual direção você deve ler o balão de fala?",
+          options: [
+            "Da direita para a esquerda",
+            "De baixo para cima",
+            "Da esquerda para a direita"
+          ],
           correct: 0,
-          tip: "'Speech' = fala | 'Bubble' = bolha/balão."
+          tip: "'Right to left' = da direita para a esquerda."
+        },
+        {
+          type: "order",
+          en: "My favorite character has blue hair.",
+          pt: "Monte a frase: 'Meu personagem favorito tem cabelo azul.'",
+          words: ["My favorite", "character", "has", "blue hair."],
+          tip: "Em inglês, o adjetivo (blue) vem antes do substantivo (hair)."
         }
       ],
       2: [
         {
-          en: 'This special edition volume includes exclusive character sketches.',
+          type: "quiz",
+          en: "This special edition volume includes exclusive character sketches.",
           pt: "O que vem incluído nesta edição especial?",
           options: [
-            'Rascunhos exclusivos dos personagens',
-            'Um pôster gigante dobrável',
-            'Adesivos brilhantes'
+            "Rascunhos exclusivos dos personagens",
+            "Um pôster gigante dobrável",
+            "Adesivos brilhantes"
           ],
           correct: 0,
           tip: "'Sketches' significa esboços ou rascunhos desenhados."
+        },
+        {
+          type: "listen",
+          en: "The artist spent three months drawing the final battle.",
+          pt: "Ouça o áudio: quanto tempo o artista levou para desenhar a batalha final?",
+          options: ["Três meses", "Duas semanas", "Cinco anos"],
+          correct: 0,
+          tip: "'Spent three months' = passou/levou três meses."
+        },
+        {
+          type: "order",
+          en: "The tournament will start at noon tomorrow.",
+          pt: "Monte a frase: 'O torneio começará ao meio-dia amanhã.'",
+          words: ["The tournament", "will start", "at noon", "tomorrow."],
+          tip: "'At noon' significa exatamente ao meio-dia."
         }
       ],
       3: [
         {
-          en: 'Despite facing a stronger rival, she never gave up on her dream.',
+          type: "quiz",
+          en: "Despite facing a stronger rival, she never gave up on her dream.",
           pt: "Qual atitude a personagem demonstrou?",
           options: [
-            'Apesar de enfrentar uma rival mais forte, ela nunca desistiu do sonho',
-            'Ela desistiu do torneio na primeira rodada',
-            'Ela trocou de equipe durante a final'
+            "Apesar de enfrentar uma rival mais forte, ela nunca desistiu do sonho",
+            "Ela desistiu do torneio na primeira rodada",
+            "Ela trocou de equipe durante a final"
           ],
           correct: 0,
           tip: "'Despite' = apesar de | 'Gave up' = desistiu."
+        },
+        {
+          type: "listen",
+          en: "The storyline explores themes of friendship, courage, and loyalty.",
+          pt: "Ouça o áudio: quais temas o enredo explora?",
+          options: [
+            "Amizade, coragem e lealdade",
+            "Culinária, viagens e esportes",
+            "Comédia, música e dança"
+          ],
+          correct: 0,
+          tip: "'Friendship' = amizade | 'Loyalty' = lealdade."
+        },
+        {
+          type: "order",
+          en: "Every warrior must overcome their own fears.",
+          pt: "Monte a frase: 'Todo guerreiro deve superar seus próprios medos.'",
+          words: ["Every warrior", "must overcome", "their own", "fears."],
+          tip: "'Overcome' significa superar ou vencer um obstáculo."
         }
       ]
     },
     cooking: {
       1: [
         {
-          en: 'Add two eggs, flour, and milk to the bowl.',
+          type: "quiz",
+          en: "Add two eggs, flour, and milk to the bowl.",
           pt: "Quais ingredientes vão na tigela ('bowl')?",
           options: [
-            'Dois ovos, farinha e leite',
-            'Açúcar, manteiga e limão',
-            'Arroz, feijão e sal'
+            "Dois ovos, farinha e leite",
+            "Açúcar, manteiga e limão",
+            "Arroz, feijão e sal"
           ],
           correct: 0,
           tip: "'Flour' = farinha | 'Bowl' = tigela."
         },
         {
-          en: 'The fresh bread smells delicious!',
-          pt: "O que a frase diz sobre o pão fresco?",
+          type: "listen",
+          en: "The fresh bread smells delicious!",
+          pt: "Ouça o áudio: o que a frase diz sobre o pão fresco?",
           options: [
-            'Tem um cheiro delicioso',
-            'Está muito quente para cortar',
-            'Acabou de cair no chão'
+            "Tem um cheiro delicioso",
+            "Está muito salgado",
+            "Acabou de sair da geladeira"
           ],
           correct: 0,
           tip: "'Smells delicious' = tem um cheiro delicioso."
+        },
+        {
+          type: "order",
+          en: "Please pass me the salt and pepper.",
+          pt: "Monte a frase: 'Por favor, me passe o sal e a pimenta.'",
+          words: ["Please", "pass me", "the salt", "and pepper."],
+          tip: "'Salt' = sal | 'Pepper' = pimenta."
         }
       ],
       2: [
         {
-          en: 'Preheat the oven for ten minutes before baking the cake.',
+          type: "quiz",
+          en: "Preheat the oven for ten minutes before baking the cake.",
           pt: "O que significa 'Preheat the oven'?",
           options: [
-            'Pré-aquecer o forno',
-            'Limpar a forma de bolo',
-            'Misturar a cobertura'
+            "Pré-aquecer o forno",
+            "Limpar a forma de bolo",
+            "Misturar a cobertura"
           ],
           correct: 0,
           tip: "'Oven' = forno | 'Baking' = assar."
+        },
+        {
+          type: "listen",
+          en: "Chop the onions and tomatoes into small pieces.",
+          pt: "Ouça a instrução: o que deve ser cortado em pedaços pequenos?",
+          options: [
+            "As cebolas e os tomates",
+            "As maçãs e as bananas",
+            "As batatas e as cenouras"
+          ],
+          correct: 0,
+          tip: "'Chop' = picar/cortar | 'Onions' = cebolas."
+        },
+        {
+          type: "order",
+          en: "This soup needs a little more garlic.",
+          pt: "Monte a frase: 'Esta sopa precisa de um pouco mais de alho.'",
+          words: ["This soup", "needs", "a little more", "garlic."],
+          tip: "'Garlic' = alho | 'A little more' = um pouco mais."
         }
       ],
       3: [
         {
-          en: 'Stir the sauce constantly so it does not burn at the bottom.',
+          type: "quiz",
+          en: "Stir the sauce constantly so it does not burn at the bottom.",
           pt: "Por que é preciso mexer o molho constantemente?",
           options: [
-            'Para não queimar no fundo',
-            'Para esfriar mais rápido',
-            'Para mudar a cor do prato'
+            "Para não queimar no fundo",
+            "Para esfriar mais rápido",
+            "Para mudar a cor do prato"
           ],
           correct: 0,
           tip: "'Stir' = mexer | 'Burn' = queimar."
+        },
+        {
+          type: "listen",
+          en: "Fresh herbs enhance the flavor of homemade dishes.",
+          pt: "Ouça o áudio: qual é o efeito das ervas frescas nos pratos caseiros?",
+          options: [
+            "Realçam o sabor",
+            "Reduzem o tempo de cozimento",
+            "Deixam o prato mais doce"
+          ],
+          correct: 0,
+          tip: "'Enhance' = realçam/melhoram | 'Homemade' = caseiro."
+        },
+        {
+          type: "order",
+          en: "Let the dough rest for thirty minutes before baking.",
+          pt: "Monte a frase: 'Deixe a massa descansar por trinta minutos antes de assar.'",
+          words: ["Let the dough", "rest for", "thirty minutes", "before baking."],
+          tip: "'Dough' (pronuncia-se 'dôu') significa massa de pão ou torta."
         }
       ]
     },
     fashion: {
       1: [
         {
-          en: 'She is wearing a blue jacket and white sneakers.',
+          type: "quiz",
+          en: "She is wearing a blue jacket and white sneakers.",
           pt: "O que ela está vestindo?",
           options: [
-            'Jaqueta azul e tênis brancos',
-            'Vestido vermelho e botas',
-            'Camiseta verde e boné'
+            "Jaqueta azul e tênis brancos",
+            "Vestido vermelho e botas",
+            "Camiseta verde e boné"
           ],
           correct: 0,
           tip: "'Sneakers' = tênis | 'Wearing' = vestindo/usando."
+        },
+        {
+          type: "listen",
+          en: "Put on your warm coat because it is cold outside.",
+          pt: "Ouça o conselho: por que você deve vestir seu casaco quente?",
+          options: [
+            "Porque está frio lá fora",
+            "Porque vai chover dentro de casa",
+            "Porque a festa já acabou"
+          ],
+          correct: 0,
+          tip: "'Put on' = vestir/colocar | 'Coat' = casaco."
+        },
+        {
+          type: "order",
+          en: "I like your new red backpack.",
+          pt: "Monte a frase: 'Eu gosto da sua mochila vermelha nova.'",
+          words: ["I like", "your new", "red", "backpack."],
+          tip: "'Backpack' = mochila."
         }
       ],
       2: [
         {
-          en: 'Vintage outfits are becoming popular again this season.',
+          type: "quiz",
+          en: "Vintage outfits are becoming popular again this season.",
           pt: "O que está ficando popular novamente nesta estação?",
           options: [
-            'Roupas estilo retrô/vintage',
-            'Mochilas transparentes',
-            'Relógios de bolso'
+            "Roupas estilo retrô/vintage",
+            "Mochilas transparentes",
+            "Relógios de bolso"
           ],
           correct: 0,
           tip: "'Outfits' = trajes/looks | 'Season' = estação/temporada."
+        },
+        {
+          type: "listen",
+          en: "Those sunglasses match perfectly with your summer hat.",
+          pt: "Ouça o áudio: o que combina perfeitamente com o chapéu de verão?",
+          options: [
+            "Aqueles óculos de sol",
+            "Aquelas luvas de inverno",
+            "Aquele cachecol de lã"
+          ],
+          correct: 0,
+          tip: "'Match' = combinar | 'Sunglasses' = óculos de sol."
+        },
+        {
+          type: "order",
+          en: "Bright colors are great for sunny days.",
+          pt: "Monte a frase: 'Cores vibrantes são ótimas para dias ensolarados.'",
+          words: ["Bright colors", "are great", "for", "sunny days."],
+          tip: "'Bright' = brilhante/vibrante | 'Sunny' = ensolarado."
         }
       ],
       3: [
         {
-          en: 'Sustainable fashion focuses on eco-friendly fabrics and fair production.',
+          type: "quiz",
+          en: "Sustainable fashion focuses on eco-friendly fabrics and fair production.",
           pt: "Em que a moda sustentável se concentra?",
           options: [
-            'Tecidos ecológicos e produção justa',
-            'Roupas descartáveis baratas',
-            'Apenas desfiles de luxo'
+            "Tecidos ecológicos e produção justa",
+            "Roupas descartáveis baratas",
+            "Apenas desfiles de luxo"
           ],
           correct: 0,
           tip: "'Fabrics' = tecidos | 'Fair' = justa."
+        },
+        {
+          type: "listen",
+          en: "Designers often draw inspiration from street culture and art.",
+          pt: "Ouça o áudio: de onde os estilistas costumam tirar inspiração?",
+          options: [
+            "Da cultura urbana (de rua) e da arte",
+            "De manuais de matemática",
+            "Apenas de uniformes antigos"
+          ],
+          correct: 0,
+          tip: "'Draw inspiration' = tirar/buscar inspiração."
+        },
+        {
+          type: "order",
+          en: "Personal style is a creative way to express yourself.",
+          pt: "Monte a frase: 'Estilo pessoal é uma forma criativa de se expressar.'",
+          words: ["Personal style", "is a creative way", "to express", "yourself."],
+          tip: "'Express yourself' = expressar a si mesmo."
         }
       ]
     },
     science: {
       1: [
         {
-          en: 'Earth orbits around the Sun once every year.',
+          type: "quiz",
+          en: "Earth orbits around the Sun once every year.",
           pt: "O que a frase afirma sobre a Terra?",
           options: [
-            'A Terra orbita ao redor do Sol uma vez por ano',
-            'A Lua é maior que o Sol',
-            'O Sol gira ao redor da Terra'
+            "A Terra orbita ao redor do Sol uma vez por ano",
+            "A Lua é maior que o Sol",
+            "O Sol gira ao redor da Terra"
           ],
           correct: 0,
           tip: "'Earth' = Terra | 'Once every year' = uma vez por ano."
+        },
+        {
+          type: "listen",
+          en: "We can see millions of stars in the night sky.",
+          pt: "Ouça o áudio: o que podemos ver no céu noturno?",
+          options: [
+            "Milhões de estrelas",
+            "Apenas nuvens de chuva",
+            "Três luas brilhantes"
+          ],
+          correct: 0,
+          tip: "'Night sky' = céu noturno | 'Stars' = estrelas."
+        },
+        {
+          type: "order",
+          en: "Robots help scientists explore distant planets.",
+          pt: "Monte a frase: 'Robôs ajudam cientistas a explorar planetas distantes.'",
+          words: ["Robots help", "scientists", "explore", "distant planets."],
+          tip: "'Scientists' = cientistas."
         }
       ],
       2: [
         {
-          en: 'Water boils at one hundred degrees Celsius at sea level.',
+          type: "quiz",
+          en: "Water boils at one hundred degrees Celsius at sea level.",
           pt: "O que acontece com a água a 100 graus Celsius?",
-          options: ['Ela ferve', 'Ela congela', 'Ela vira cristal'],
+          options: ["Ela ferve", "Ela congela", "Ela vira cristal"],
           correct: 0,
           tip: "'Boils' = ferve | 'Sea level' = nível do mar."
+        },
+        {
+          type: "listen",
+          en: "Gravity keeps all the planets in orbit around the Sun.",
+          pt: "Ouça o áudio: qual força mantém os planetas em órbita ao redor do Sol?",
+          options: ["A gravidade", "O magnetismo lunar", "O vento solar"],
+          correct: 0,
+          tip: "'Keeps' = mantém | 'Gravity' = gravidade."
+        },
+        {
+          type: "order",
+          en: "Sound travels much slower than light.",
+          pt: "Monte a frase: 'O som viaja muito mais devagar que a luz.'",
+          words: ["Sound travels", "much slower", "than", "light."],
+          tip: "'Slower than' = mais devagar que."
         }
       ],
       3: [
         {
-          en: 'Plants convert sunlight into chemical energy through photosynthesis.',
+          type: "quiz",
+          en: "Plants convert sunlight into chemical energy through photosynthesis.",
           pt: "Como as plantas convertem luz solar em energia química?",
           options: [
-            'Através da fotossíntese',
-            'Através da evaporação',
-            'Através da gravidade'
+            "Através da fotossíntese",
+            "Através da evaporação",
+            "Através da gravidade"
           ],
           correct: 0,
           tip: "'Sunlight' = luz solar | 'Through' = através de."
+        },
+        {
+          type: "listen",
+          en: "Renewable energy sources reduce carbon emissions and protect nature.",
+          pt: "Ouça o áudio: qual é o benefício das fontes de energia renovável?",
+          options: [
+            "Reduzem emissões de carbono e protegem a natureza",
+            "Aumentam o consumo de combustíveis fósseis",
+            "Funcionam apenas durante a noite"
+          ],
+          correct: 0,
+          tip: "'Renewable' = renovável | 'Sources' = fontes."
+        },
+        {
+          type: "order",
+          en: "Every experiment begins with a clear hypothesis.",
+          pt: "Monte a frase: 'Todo experimento começa com uma hipótese clara.'",
+          words: ["Every experiment", "begins with", "a clear", "hypothesis."],
+          tip: "'Begins with' = começa com."
         }
       ]
     },
     movies: {
       1: [
         {
-          en: 'The movie starts at seven o’clock. Don’t forget the popcorn!',
+          type: "quiz",
+          en: "The movie starts at seven o’clock. Don’t forget the popcorn!",
           pt: "O que não se deve esquecer antes do filme começar?",
-          options: ['A pipoca', 'O guarda-chuva', 'O fone de ouvido'],
+          options: ["A pipoca", "O guarda-chuva", "O fone de ouvido"],
           correct: 0,
           tip: "'Popcorn' = pipoca | 'Don't forget' = não se esqueça."
+        },
+        {
+          type: "listen",
+          en: "Let us watch a funny comedy tonight!",
+          pt: "Ouça o convite: que tipo de filme vamos assistir hoje à noite?",
+          options: [
+            "Uma comédia engraçada",
+            "Um documentário sobre vulcões",
+            "Um filme de terror silencioso"
+          ],
+          correct: 0,
+          tip: "'Tonight' = hoje à noite | 'Funny' = engraçado(a)."
+        },
+        {
+          type: "order",
+          en: "The main actor won a gold trophy.",
+          pt: "Monte a frase: 'O ator principal ganhou um troféu de ouro.'",
+          words: ["The main actor", "won", "a gold", "trophy."],
+          tip: "'Won' é o passado de 'win' (ganhar)."
         }
       ],
       2: [
         {
-          en: 'The soundtrack made the final scene even more emotional.',
+          type: "quiz",
+          en: "The soundtrack made the final scene even more emotional.",
           pt: "O que tornou a cena final ainda mais emocionante?",
-          options: ['A trilha sonora', 'Os efeitos de chuva', 'Os créditos finais'],
+          options: ["A trilha sonora", "Os efeitos de chuva", "Os créditos finais"],
           correct: 0,
           tip: "'Soundtrack' = trilha sonora | 'Scene' = cena."
+        },
+        {
+          type: "listen",
+          en: "I prefer watching foreign movies with original audio and subtitles.",
+          pt: "Ouça o áudio: como a pessoa prefere assistir a filmes estrangeiros?",
+          options: [
+            "Com áudio original e legendas",
+            "Sem som e em preto e branco",
+            "Apenas no celular sem fones"
+          ],
+          correct: 0,
+          tip: "'Subtitles' = legendas | 'Foreign' = estrangeiro."
+        },
+        {
+          type: "order",
+          en: "The director shouted action before the scene started.",
+          pt: "Monte a frase: 'O diretor gritou ação antes da cena começar.'",
+          words: ["The director", "shouted action", "before", "the scene started."],
+          tip: "'Shouted' = gritou."
         }
       ],
       3: [
         {
-          en: 'The plot twist at the end surprised the entire audience.',
+          type: "quiz",
+          en: "The plot twist at the end surprised the entire audience.",
           pt: "O que surpreendeu toda a plateia no final?",
           options: [
-            'A reviravolta na história (plot twist)',
-            'A falta de energia no cinema',
-            'O atraso da sessão'
+            "A reviravolta na história (plot twist)",
+            "A falta de energia no cinema",
+            "O atraso da sessão"
           ],
           correct: 0,
           tip: "'Plot twist' = reviravolta no enredo | 'Audience' = plateia."
+        },
+        {
+          type: "listen",
+          en: "Visual effects allow filmmakers to create entire fantasy worlds.",
+          pt: "Ouça o áudio: o que os efeitos visuais permitem aos cineastas criar?",
+          options: [
+            "Mundos inteiros de fantasia",
+            "Roteiros sem atores",
+            "Salas de cinema maiores"
+          ],
+          correct: 0,
+          tip: "'Allow' = permitem | 'Filmmakers' = cineastas."
+        },
+        {
+          type: "order",
+          en: "Behind the scenes footage reveals how stunts were filmed.",
+          pt: "Monte a frase: 'Cenas de bastidores revelam como as acrobacias foram filmadas.'",
+          words: ["Behind the scenes", "footage reveals", "how stunts", "were filmed."],
+          tip: "'Behind the scenes' = nos bastidores | 'Stunts' = cenas de ação/acrobacias."
         }
       ]
     },
     reading: {
       1: [
         {
-          en: 'I love reading adventure stories before going to sleep.',
+          type: "quiz",
+          en: "I love reading adventure stories before going to sleep.",
           pt: "Que tipo de histórias a pessoa gosta de ler antes de dormir?",
           options: [
-            'Histórias de aventura',
-            'Receitas de bolo',
-            'Manuais de computador'
+            "Histórias de aventura",
+            "Receitas de bolo",
+            "Manuais de computador"
           ],
           correct: 0,
           tip: "'Adventure stories' = histórias de aventura."
+        },
+        {
+          type: "listen",
+          en: "Open your book to page twelve and read the title.",
+          pt: "Ouça a instrução: em qual página você deve abrir o livro?",
+          options: ["Página 12", "Página 20", "Página 2"],
+          correct: 0,
+          tip: "'Twelve' = doze (12)."
+        },
+        {
+          type: "order",
+          en: "This magic book has a golden cover.",
+          pt: "Monte a frase: 'Este livro mágico tem uma capa dourada.'",
+          words: ["This magic book", "has", "a golden", "cover."],
+          tip: "'Cover' = capa do livro."
         }
       ],
       2: [
         {
-          en: 'The library is a quiet place where you can borrow books for free.',
+          type: "quiz",
+          en: "The library is a quiet place where you can borrow books for free.",
           pt: "O que você pode fazer gratuitamente na biblioteca?",
           options: [
-            'Pegar livros emprestados',
-            'Comprar videogames',
-            'Assistir a shows ao vivo'
+            "Pegar livros emprestados",
+            "Comprar videogames",
+            "Assistir a shows ao vivo"
           ],
           correct: 0,
           tip: "'Borrow' = pegar emprestado | 'For free' = de graça."
+        },
+        {
+          type: "listen",
+          en: "The mysterious map was hidden inside an ancient dictionary.",
+          pt: "Ouça o áudio: onde o mapa misterioso estava escondido?",
+          options: [
+            "Dentro de um dicionário antigo",
+            "Debaixo de uma ponte de pedra",
+            "Atrás de um quadro na escola"
+          ],
+          correct: 0,
+          tip: "'Hidden' = escondido | 'Ancient' = antigo."
+        },
+        {
+          type: "order",
+          en: "Reading every day improves your vocabulary quickly.",
+          pt: "Monte a frase: 'Ler todos os dias melhora seu vocabulário rapidamente.'",
+          words: ["Reading every day", "improves", "your vocabulary", "quickly."],
+          tip: "'Improves' = melhora."
         }
       ],
       3: [
         {
-          en: 'A well-written chapter leaves the reader eager to turn the page.',
+          type: "quiz",
+          en: "A well-written chapter leaves the reader eager to turn the page.",
           pt: "Qual efeito um capítulo bem escrito causa no leitor?",
           options: [
-            'Deixa o leitor ansioso para virar a página',
-            'Faz o leitor fechar o livro imediatamente',
-            'Confunde o final da história'
+            "Deixa o leitor ansioso para virar a página",
+            "Faz o leitor fechar o livro imediatamente",
+            "Confunde o final da história"
           ],
           correct: 0,
           tip: "'Eager' = ansioso/entusiasmado | 'Turn the page' = virar a página."
+        },
+        {
+          type: "listen",
+          en: "Science fiction novels often imagine how technology will shape the future.",
+          pt: "Ouça o áudio: o que os romances de ficção científica costumam imaginar?",
+          options: [
+            "Como a tecnologia moldará o futuro",
+            "Como eram as cidades na Idade Média",
+            "Como cultivar jardins sem água"
+          ],
+          correct: 0,
+          tip: "'Shape the future' = moldar/transformar o futuro."
+        },
+        {
+          type: "order",
+          en: "The narrator described the storm with vivid details.",
+          pt: "Monte a frase: 'O narrador descreveu a tempestade com detalhes vívidos.'",
+          words: ["The narrator", "described the storm", "with", "vivid details."],
+          tip: "'Storm' = tempestade | 'Vivid' = vívido/intenso."
         }
       ]
     }
   }
 
   const SHOP_ITEMS = [
-    { id: 'cap', name: '🧢 Boné Azul', price: 0, desc: 'Boné clássico da Academia' },
-    { id: 'headset', name: '🎧 Headset Neon', price: 25, desc: 'Fone gamer para ouvir inglês' },
-    { id: 'glasses', name: '🕶️ Óculos Pixel', price: 45, desc: 'Estilo lendário na vila' },
-    { id: 'crown', name: '👑 Coroa de Ouro', price: 80, desc: 'Para mestres do vocabulário' },
-    { id: 'aura', name: '✨ Aura Dourada', price: 120, desc: 'Brilho especial ao caminhar' }
+    { id: "cap", name: "🧢 Boné Azul", price: 0, desc: "Boné clássico da Academia" },
+    { id: "headset", name: "🎧 Headset Neon", price: 25, desc: "Fone gamer para ouvir inglês" },
+    { id: "glasses", name: "🕶️ Óculos Pixel", price: 45, desc: "Estilo lendário na vila" },
+    { id: "crown", name: "👑 Coroa de Ouro", price: 80, desc: "Para mestres do vocabulário" },
+    { id: "aura", name: "✨ Aura Dourada", price: 120, desc: "Brilho especial ao caminhar" }
   ]
 
   const CLASSMATES = [
-    { name: 'Ana Clara', theme: '📚 HQs & Mangá', xp: 240 },
-    { name: 'Lucas M.', theme: '🎮 Games & Tech', xp: 185 },
-    { name: 'Gabriel S.', theme: '🔬 Ciências', xp: 130 },
-    { name: 'Mariana R.', theme: '🎬 Filmes & Séries', xp: 90 }
+    { name: "Ana Clara", theme: "📚 HQs & Mangá", xp: 240 },
+    { name: "Lucas M.", theme: "🎮 Games & Tech", xp: 185 },
+    { name: "Gabriel S.", theme: "🔬 Ciências", xp: 130 },
+    { name: "Mariana R.", theme: "🎬 Filmes & Séries", xp: 90 }
   ]
 
-  const STORAGE_KEY = 'robolingo_rpg_save_v1'
+  const STORAGE_KEY = "robolingo_rpg_save_v2"
 
   let state = {
     registered: false,
-    name: 'Explorador',
-    theme: 'games',
+    name: "Explorador",
+    theme: "games",
     level: 1,
     xp: 0,
     coins: 20,
-    owned: ['cap'],
-    equipped: 'cap',
+    streak: 0,
+    owned: ["cap"],
+    equipped: "cap",
     solvedCount: 0
   }
 
   let currentQuestion = null
+  let lastQuestionEn = ""
   let questionAnswered = false
+  let textRevealed = false
+  let selectedWordIndices = []
+  let shuffledWords = []
 
   function loadState() {
     try {
@@ -351,7 +736,7 @@ window.Robolingo = (() => {
         state = { ...state, ...JSON.parse(raw) }
       }
     } catch (e) {
-      console.warn('Erro ao carregar progresso local:', e)
+      console.warn("Erro ao carregar progresso local:", e)
     }
   }
 
@@ -359,9 +744,22 @@ window.Robolingo = (() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
     } catch (e) {
-      console.warn('Erro ao salvar progresso local:', e)
+      console.warn("Erro ao salvar progresso local:", e)
     }
     updateHUD()
+  }
+
+  function shuffleArray(arr) {
+    const copy = arr.map((word, originalIdx) => ({ word, originalIdx }))
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[copy[i], copy[j]] = [copy[j], copy[i]]
+    }
+    // Evita que venha exatamente na ordem original
+    if (copy.length > 1 && copy.every((item, idx) => item.originalIdx === idx)) {
+      ;[copy[0], copy[1]] = [copy[1], copy[0]]
+    }
+    return copy
   }
 
   function playTone(type) {
@@ -372,8 +770,8 @@ window.Robolingo = (() => {
       osc.connect(gain)
       gain.connect(ctx.destination)
 
-      if (type === 'win') {
-        osc.type = 'triangle'
+      if (type === "win") {
+        osc.type = "triangle"
         osc.frequency.setValueAtTime(523.25, ctx.currentTime)
         osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1)
         osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2)
@@ -381,8 +779,8 @@ window.Robolingo = (() => {
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45)
         osc.start()
         osc.stop(ctx.currentTime + 0.45)
-      } else if (type === 'wrong') {
-        osc.type = 'sawtooth'
+      } else if (type === "wrong") {
+        osc.type = "sawtooth"
         osc.frequency.setValueAtTime(190, ctx.currentTime)
         osc.frequency.setValueAtTime(145, ctx.currentTime + 0.15)
         gain.gain.setValueAtTime(0.12, ctx.currentTime)
@@ -390,7 +788,7 @@ window.Robolingo = (() => {
         osc.start()
         osc.stop(ctx.currentTime + 0.35)
       } else {
-        osc.type = 'sine'
+        osc.type = "sine"
         osc.frequency.setValueAtTime(660, ctx.currentTime)
         gain.gain.setValueAtTime(0.08, ctx.currentTime)
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12)
@@ -401,24 +799,25 @@ window.Robolingo = (() => {
   }
 
   function speakEnglish(text, rate = 0.92) {
-    if (!('speechSynthesis' in window)) return
+    if (!("speechSynthesis" in window)) return
     window.speechSynthesis.cancel()
     const utter = new SpeechSynthesisUtterance(text)
-    utter.lang = 'en-US'
+    utter.lang = "en-US"
     utter.rate = rate
     const voices = window.speechSynthesis.getVoices()
     const enVoice =
-      voices.find((v) => v.lang === 'en-US' && v.name.includes('Google')) ||
-      voices.find((v) => v.lang.startsWith('en'))
+      voices.find((v) => v.lang === "en-US" && v.name.includes("Google")) ||
+      voices.find((v) => v.lang.startsWith("en"))
     if (enVoice) utter.voice = enVoice
     window.speechSynthesis.speak(utter)
   }
 
   function updateHUD() {
-    const hudName = document.getElementById('hudPlayerName')
-    const hudMeta = document.getElementById('hudPlayerMeta')
-    const hudXp = document.getElementById('hudXp')
-    const hudCoins = document.getElementById('hudCoins')
+    const hudName = document.getElementById("hudPlayerName")
+    const hudMeta = document.getElementById("hudPlayerMeta")
+    const hudXp = document.getElementById("hudXp")
+    const hudCoins = document.getElementById("hudCoins")
+    const hudStreak = document.getElementById("hudStreak")
 
     if (!hudName) return
     const themeInfo = THEMES[state.theme] || THEMES.games
@@ -426,55 +825,60 @@ window.Robolingo = (() => {
     hudMeta.textContent = `Nv.${state.level} • ${themeInfo.label}`
     hudXp.textContent = `${state.xp} XP`
     hudCoins.textContent = `${state.coins}`
+
+    if (hudStreak) {
+      if (state.streak > 0) {
+        hudStreak.style.display = "flex"
+        hudStreak.style.borderColor = state.streak >= 3 ? "#f97316" : "#334155"
+        hudStreak.style.color = state.streak >= 3 ? "#fb923c" : "#f8fafc"
+        hudStreak.innerHTML = `🔥 ${state.streak}${state.streak >= 3 ? " (1.5x)" : ""}`
+      } else {
+        hudStreak.style.display = "none"
+      }
+    }
   }
 
   function isModalOpen() {
-    const login = document.getElementById('loginModal')
-    const mission = document.getElementById('missionModal')
-    const shop = document.getElementById('shopModal')
-    const rank = document.getElementById('rankModal')
-    return (
-      (login && login.style.display === 'flex') ||
-      (mission && mission.style.display === 'flex') ||
-      (shop && shop.style.display === 'flex') ||
-      (rank && rank.style.display === 'flex')
-    )
+    return ["loginModal", "missionModal", "shopModal", "rankModal"].some((id) => {
+      const el = document.getElementById(id)
+      return el && el.style.display === "flex"
+    })
   }
 
   function closeAllModals() {
-    ;['missionModal', 'shopModal', 'rankModal'].forEach((id) => {
+    ;["missionModal", "shopModal", "rankModal"].forEach((id) => {
       const el = document.getElementById(id)
-      if (el) el.style.display = 'none'
+      if (el) el.style.display = "none"
     })
-    if (typeof battle !== 'undefined') {
+    if (typeof battle !== "undefined") {
       battle.initiated = false
     }
   }
 
   function openLoginModal() {
-    const modal = document.getElementById('loginModal')
+    const modal = document.getElementById("loginModal")
     if (!modal) return
-    document.getElementById('inputStudentName').value =
-      state.name !== 'Explorador' ? state.name : ''
-    document.getElementById('selectStudentTheme').value = state.theme
-    document.getElementById('selectStudentLevel').value = String(state.level)
-    modal.style.display = 'flex'
+    document.getElementById("inputStudentName").value =
+      state.name !== "Explorador" ? state.name : ""
+    document.getElementById("selectStudentTheme").value = state.theme
+    document.getElementById("selectStudentLevel").value = String(state.level)
+    modal.style.display = "flex"
   }
 
   function submitLogin() {
-    const nameInput = document.getElementById('inputStudentName').value.trim()
-    const themeVal = document.getElementById('selectStudentTheme').value
-    const levelVal = Number(document.getElementById('selectStudentLevel').value) || 1
+    const nameInput = document.getElementById("inputStudentName").value.trim()
+    const themeVal = document.getElementById("selectStudentTheme").value
+    const levelVal = Number(document.getElementById("selectStudentLevel").value) || 1
 
-    state.name = nameInput || 'Explorador'
+    state.name = nameInput || "Explorador"
     state.theme = themeVal
     state.level = levelVal
     state.registered = true
     saveState()
-    playTone('win')
+    playTone("win")
 
-    document.getElementById('loginModal').style.display = 'none'
-    if (typeof audio !== 'undefined' && audio.Map && !audio.Map.playing()) {
+    document.getElementById("loginModal").style.display = "none"
+    if (typeof audio !== "undefined" && audio.Map && !audio.Map.playing()) {
       audio.Map.play()
     }
   }
@@ -482,159 +886,332 @@ window.Robolingo = (() => {
   function getRandomQuestion() {
     const themeBank = QUESTIONS[state.theme] || QUESTIONS.games
     const levelBank = themeBank[state.level] || themeBank[1]
-    return levelBank[Math.floor(Math.random() * levelBank.length)]
+    const candidates = levelBank.filter((q) => q.en !== lastQuestionEn)
+    const pool = candidates.length > 0 ? candidates : levelBank
+    const chosen = pool[Math.floor(Math.random() * pool.length)]
+    lastQuestionEn = chosen.en
+    return chosen
   }
 
-  function openMission(source = 'hud') {
+  function revealListeningText() {
+    if (!currentQuestion || textRevealed) return
+    textRevealed = true
+    const enText = document.getElementById("missionEnText")
+    const revealBtn = document.getElementById("btnRevealText")
+    enText.textContent = `"${currentQuestion.en}"`
+    enText.style.filter = "none"
+    if (revealBtn) revealBtn.style.display = "none"
+    playTone("click")
+  }
+
+  function renderWordBuilder() {
+    const targetBox = document.getElementById("wordBuilderTarget")
+    const bankBox = document.getElementById("wordBuilderBank")
+    targetBox.innerHTML = ""
+    bankBox.innerHTML = ""
+
+    if (selectedWordIndices.length === 0) {
+      targetBox.innerHTML =
+        '<span style="font-size:8px; color:#64748b;">Toque nos blocos abaixo na ordem correta...</span>'
+    } else {
+      selectedWordIndices.forEach((shuffledIdx, posInAnswer) => {
+        const chip = document.createElement("button")
+        chip.className = "robo-word-chip selected"
+        chip.textContent = shuffledWords[shuffledIdx].word
+        chip.disabled = questionAnswered
+        chip.onclick = () => {
+          if (questionAnswered) return
+          selectedWordIndices.splice(posInAnswer, 1)
+          playTone("click")
+          renderWordBuilder()
+        }
+        targetBox.appendChild(chip)
+      })
+    }
+
+    shuffledWords.forEach((item, shuffledIdx) => {
+      const isUsed = selectedWordIndices.includes(shuffledIdx)
+      const btn = document.createElement("button")
+      btn.className = "robo-word-chip"
+      btn.textContent = item.word
+      btn.disabled = isUsed || questionAnswered
+      if (isUsed) {
+        btn.style.opacity = "0.35"
+      }
+      btn.onclick = () => {
+        if (questionAnswered || isUsed) return
+        selectedWordIndices.push(shuffledIdx)
+        playTone("click")
+        renderWordBuilder()
+      }
+      bankBox.appendChild(btn)
+    })
+  }
+
+  function checkWordOrder(source) {
+    if (questionAnswered || !currentQuestion) return
+    if (selectedWordIndices.length !== currentQuestion.words.length) {
+      playTone("wrong")
+      const feedback = document.getElementById("missionFeedback")
+      feedback.style.display = "block"
+      feedback.style.background = "#422006"
+      feedback.style.borderColor = "#f59e0b"
+      feedback.innerHTML =
+        '<div style="color:#fcd34d;">⚠️ Use todos os blocos de palavras antes de verificar!</div>'
+      return
+    }
+
+    const builtSentence = selectedWordIndices
+      .map((idx) => shuffledWords[idx].word)
+      .join(" ")
+    const expectedSentence = currentQuestion.words.join(" ")
+    const isCorrect = builtSentence === expectedSentence
+
+    finalizeMissionResult(isCorrect, source, expectedSentence)
+  }
+
+  function openMission(source = "hud") {
     closeAllModals()
-    if (typeof battle !== 'undefined') {
+    if (typeof battle !== "undefined") {
       battle.initiated = true
     }
 
     currentQuestion = getRandomQuestion()
     questionAnswered = false
+    textRevealed = currentQuestion.type !== "listen"
+    selectedWordIndices = []
 
     const themeInfo = THEMES[state.theme] || THEMES.games
-    const badge = document.getElementById('missionSourceBadge')
-    const enText = document.getElementById('missionEnText')
-    const ptText = document.getElementById('missionPtText')
-    const optionsBox = document.getElementById('missionOptions')
-    const feedback = document.getElementById('missionFeedback')
+    const badge = document.getElementById("missionSourceBadge")
+    const streakBanner = document.getElementById("missionStreakBanner")
+    const enText = document.getElementById("missionEnText")
+    const revealBtn = document.getElementById("btnRevealText")
+    const ptText = document.getElementById("missionPtText")
+    const optionsBox = document.getElementById("missionOptions")
+    const wordBuilderBox = document.getElementById("wordBuilderContainer")
+    const feedback = document.getElementById("missionFeedback")
 
-    if (source === 'grass') {
-      badge.textContent = '⚡ ENCONTRO NA GRAMA • DESAFIO BÔNUS'
-      badge.style.background = '#15803d'
-    } else if (source === 'npc') {
+    if (currentQuestion.type === "listen") {
+      badge.textContent = "🎧 ESCUTA PURA • 2X MOEDAS"
+      badge.style.background = "#0e7490"
+    } else if (currentQuestion.type === "order") {
+      badge.textContent = "🧩 MONTE A FRASE"
+      badge.style.background = "#6d28d9"
+    } else if (source === "grass") {
+      badge.textContent = "⚡ ENCONTRO NA GRAMA"
+      badge.style.background = "#15803d"
+    } else if (source === "npc") {
       badge.textContent = `💬 ${themeInfo.npcName.toUpperCase()}`
-      badge.style.background = '#1d4ed8'
+      badge.style.background = "#1d4ed8"
     } else {
       badge.textContent = `🎯 MISSÃO • ${themeInfo.label.toUpperCase()}`
-      badge.style.background = '#7e22ce'
+      badge.style.background = "#7e22ce"
     }
 
-    enText.textContent = `"${currentQuestion.en}"`
+    if (state.streak >= 2) {
+      streakBanner.style.display = "block"
+      streakBanner.textContent =
+        state.streak >= 3
+          ? `🔥 COMBO ATIVO (${state.streak} acertos): +50% XP e Moedas!`
+          : `🔥 ${state.streak} acertos seguidos! Acerte mais 1 para ativar o bônus 1.5x!`
+    } else {
+      streakBanner.style.display = "none"
+    }
+
+    if (currentQuestion.type === "listen") {
+      enText.textContent = "🎧 Ouça a pronúncia nos botões abaixo..."
+      revealBtn.style.display = "inline-block"
+    } else {
+      enText.textContent = `"${currentQuestion.en}"`
+      revealBtn.style.display = "none"
+    }
+
     ptText.textContent = currentQuestion.pt
-    feedback.style.display = 'none'
-    feedback.innerHTML = ''
-    optionsBox.innerHTML = ''
+    feedback.style.display = "none"
+    feedback.innerHTML = ""
+    optionsBox.innerHTML = ""
 
-    currentQuestion.options.forEach((opt, idx) => {
-      const btn = document.createElement('button')
-      btn.className = 'robo-option-btn'
-      btn.textContent = `${['A', 'B', 'C'][idx]}) ${opt}`
-      btn.onclick = () => handleAnswer(idx, btn, source)
-      optionsBox.appendChild(btn)
-    })
+    if (currentQuestion.type === "order") {
+      optionsBox.style.display = "none"
+      wordBuilderBox.style.display = "block"
+      shuffledWords = shuffleArray(currentQuestion.words)
+      const checkBtn = document.getElementById("btnCheckOrder")
+      checkBtn.disabled = false
+      checkBtn.onclick = () => checkWordOrder(source)
+      renderWordBuilder()
+    } else {
+      wordBuilderBox.style.display = "none"
+      optionsBox.style.display = "block"
+      currentQuestion.options.forEach((opt, idx) => {
+        const btn = document.createElement("button")
+        btn.className = "robo-option-btn"
+        btn.textContent = `${["A", "B", "C"][idx]}) ${opt}`
+        btn.onclick = () => handleQuizAnswer(idx, btn, source)
+        optionsBox.appendChild(btn)
+      })
+    }
 
-    document.getElementById('missionModal').style.display = 'flex'
+    document.getElementById("missionModal").style.display = "flex"
     setTimeout(() => speakEnglish(currentQuestion.en, 0.92), 250)
   }
 
-  function handleAnswer(selectedIdx, btnEl, source) {
+  function handleQuizAnswer(selectedIdx, btnEl, source) {
     if (questionAnswered) return
-    questionAnswered = true
-
-    const feedback = document.getElementById('missionFeedback')
-    const allBtns = document.querySelectorAll('.robo-option-btn')
+    const allBtns = document.querySelectorAll(".robo-option-btn")
     allBtns.forEach((b, i) => {
       b.disabled = true
       if (i === currentQuestion.correct) {
-        b.style.background = '#16a34a'
-        b.style.color = '#fff'
-        b.style.borderColor = '#bbf7d0'
+        b.style.background = "#16a34a"
+        b.style.color = "#fff"
+        b.style.borderColor = "#bbf7d0"
       }
     })
 
-    if (selectedIdx === currentQuestion.correct) {
-      const bonus = source === 'grass' ? 5 : 0
-      const earnedXp = 20 + state.level * 10
-      const earnedCoins = 10 + state.level * 5 + bonus
+    const isCorrect = selectedIdx === currentQuestion.correct
+    if (!isCorrect) {
+      btnEl.style.background = "#dc2626"
+      btnEl.style.color = "#fff"
+    }
+
+    finalizeMissionResult(isCorrect, source)
+  }
+
+  function finalizeMissionResult(isCorrect, source, extraCorrectInfo = "") {
+    questionAnswered = true
+    const feedback = document.getElementById("missionFeedback")
+    const enText = document.getElementById("missionEnText")
+    const revealBtn = document.getElementById("btnRevealText")
+    const checkBtn = document.getElementById("btnCheckOrder")
+
+    // Revela a frase completa ao finalizar
+    enText.textContent = `"${currentQuestion.en}"`
+    if (revealBtn) revealBtn.style.display = "none"
+    if (checkBtn) checkBtn.disabled = true
+
+    if (isCorrect) {
+      state.streak += 1
+      const grassBonus = source === "grass" ? 5 : 0
+      const listeningDouble = currentQuestion.type === "listen" && !textRevealed ? 2 : 1
+      const comboMultiplier = state.streak >= 3 ? 1.5 : 1
+
+      const earnedXp = Math.round((20 + state.level * 10) * comboMultiplier)
+      const earnedCoins = Math.round(
+        (10 + state.level * 5 + grassBonus) * listeningDouble * comboMultiplier
+      )
 
       state.xp += earnedXp
       state.coins += earnedCoins
       state.solvedCount += 1
 
-      if (state.xp >= state.level * 120 && state.level < 3) {
+      if (state.xp >= state.level * 150 && state.level < 3) {
         state.level += 1
       }
 
       saveState()
-      playTone('win')
+      playTone("win")
 
-      feedback.style.display = 'block'
-      feedback.style.background = '#052e16'
-      feedback.style.borderColor = '#22c55e'
+      const badges = []
+      if (listeningDouble === 2) badges.push("🎧 2x Escuta Pura")
+      if (comboMultiplier > 1) badges.push(`🔥 Combo ${state.streak}x`)
+
+      feedback.style.display = "block"
+      feedback.style.background = "#052e16"
+      feedback.style.borderColor = "#22c55e"
       feedback.innerHTML = `
-        <div style="color:#4ade80; margin-bottom:6px;">✅ EXCELENTE! +${earnedXp} XP e +${earnedCoins} EduCoins!</div>
-        <div style="color:#e2e8f0; font-size:9px; line-height:1.5;">💡 ${currentQuestion.tip}</div>
+        <div style="color:#4ade80; margin-bottom:6px;">
+          ✅ EXCELENTE! +${earnedXp} XP e +${earnedCoins} EduCoins!
+        </div>
+        ${
+          badges.length
+            ? `<div style="color:#facc15; font-size:8px; margin-bottom:6px;">${badges.join(
+                " • "
+              )}</div>`
+            : ""
+        }
+        <div style="color:#e2e8f0; font-size:9px; line-height:1.5;">💡 ${
+          currentQuestion.tip
+        }</div>
+        <button onclick="Robolingo.openMission('${source}')" style="margin-top:10px; width:100%; padding:9px; background:#16a34a; color:#fff; border-radius:8px; font-size:9px;">
+          ▶ Próxima Missão
+        </button>
       `
     } else {
-      btnEl.style.background = '#dc2626'
-      btnEl.style.color = '#fff'
-      playTone('wrong')
+      state.streak = 0
+      saveState()
+      playTone("wrong")
 
-      feedback.style.display = 'block'
-      feedback.style.background = '#450a0a'
-      feedback.style.borderColor = '#ef4444'
+      feedback.style.display = "block"
+      feedback.style.background = "#450a0a"
+      feedback.style.borderColor = "#ef4444"
       feedback.innerHTML = `
-        <div style="color:#fca5a5; margin-bottom:6px;">❌ QUASE LÁ! Veja a resposta verde acima.</div>
-        <div style="color:#e2e8f0; font-size:9px; line-height:1.5;">💡 ${currentQuestion.tip}</div>
+        <div style="color:#fca5a5; margin-bottom:6px;">❌ QUASE LÁ! Sequência reiniciada.</div>
+        ${
+          extraCorrectInfo
+            ? `<div style="color:#86efac; font-size:9px; margin-bottom:6px;">Ordem correta: "${extraCorrectInfo}"</div>`
+            : ""
+        }
+        <div style="color:#e2e8f0; font-size:9px; line-height:1.5;">💡 ${
+          currentQuestion.tip
+        }</div>
+        <button onclick="Robolingo.openMission('${source}')" style="margin-top:10px; width:100%; padding:9px; background:#dc2626; color:#fff; border-radius:8px; font-size:9px;">
+          ↻ Tentar Novo Desafio
+        </button>
       `
     }
   }
 
   function openShop() {
     closeAllModals()
-    if (typeof battle !== 'undefined') battle.initiated = true
+    if (typeof battle !== "undefined") battle.initiated = true
 
-    const list = document.getElementById('shopItemsList')
-    document.getElementById('shopBalance').textContent = `Saldo: 🪙 ${state.coins} EduCoins`
-    list.innerHTML = ''
+    const list = document.getElementById("shopItemsList")
+    document.getElementById("shopBalance").textContent = `Saldo: 🪙 ${state.coins} EduCoins`
+    list.innerHTML = ""
 
     SHOP_ITEMS.forEach((item) => {
       const owned = state.owned.includes(item.id)
       const equipped = state.equipped === item.id
 
-      const card = document.createElement('div')
-      card.className = 'robo-shop-card'
+      const card = document.createElement("div")
+      card.className = "robo-shop-card"
       card.innerHTML = `
         <div>
           <div style="font-size:10px; color:#f8fafc; margin-bottom:4px;">${item.name}</div>
           <div style="font-size:8px; color:#94a3b8; line-height:1.4;">${item.desc}</div>
         </div>
         <button class="robo-mini-btn" style="background:${
-          equipped ? '#16a34a' : owned ? '#2563eb' : '#d97706'
+          equipped ? "#16a34a" : owned ? "#2563eb" : "#d97706"
         }">
-          ${equipped ? 'Equipado' : owned ? 'Equipar' : `🪙 \${item.price}`}
+          ${equipped ? "Equipado" : owned ? "Equipar" : `🪙 ${item.price}`}
         </button>
       `
-      card.querySelector('button').onclick = () => {
+      card.querySelector("button").onclick = () => {
         if (owned) {
           state.equipped = item.id
           saveState()
-          playTone('click')
+          playTone("click")
           openShop()
         } else if (state.coins >= item.price) {
           state.coins -= item.price
           state.owned.push(item.id)
           state.equipped = item.id
           saveState()
-          playTone('win')
+          playTone("win")
           openShop()
         } else {
-          playTone('wrong')
-          alert('EduCoins insuficientes! Complete mais missões de inglês na vila.')
+          playTone("wrong")
+          alert("EduCoins insuficientes! Complete mais missões de inglês na vila.")
         }
       }
       list.appendChild(card)
     })
 
-    document.getElementById('shopModal').style.display = 'flex'
+    document.getElementById("shopModal").style.display = "flex"
   }
 
   function openRanking() {
     closeAllModals()
-    if (typeof battle !== 'undefined') battle.initiated = true
+    if (typeof battle !== "undefined") battle.initiated = true
 
     const themeInfo = THEMES[state.theme] || THEMES.games
     const combined = [
@@ -642,22 +1219,24 @@ window.Robolingo = (() => {
       { name: `${state.name} (Você)`, theme: themeInfo.label, xp: state.xp, isMe: true }
     ].sort((a, b) => b.xp - a.xp)
 
-    const list = document.getElementById('rankingList')
-    list.innerHTML = ''
+    const list = document.getElementById("rankingList")
+    list.innerHTML = ""
 
     combined.forEach((entry, idx) => {
-      const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`
-      const row = document.createElement('div')
-      row.className = 'robo-rank-row'
+      const medal = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `#${idx + 1}`
+      const row = document.createElement("div")
+      row.className = "robo-rank-row"
       if (entry.isMe) {
-        row.style.borderColor = '#facc15'
-        row.style.background = '#1e293b'
+        row.style.borderColor = "#facc15"
+        row.style.background = "#1e293b"
       }
       row.innerHTML = `
         <div style="display:flex; align-items:center; gap:8px;">
           <span style="font-size:12px;">${medal}</span>
           <div>
-            <div style="font-size:10px; color:${entry.isMe ? '#facc15' : '#f8fafc'};">${entry.name}</div>
+            <div style="font-size:10px; color:${entry.isMe ? "#facc15" : "#f8fafc"};">${
+        entry.name
+      }</div>
             <div style="font-size:8px; color:#94a3b8; margin-top:3px;">${entry.theme}</div>
           </div>
         </div>
@@ -666,7 +1245,7 @@ window.Robolingo = (() => {
       list.appendChild(row)
     })
 
-    document.getElementById('rankModal').style.display = 'flex'
+    document.getElementById("rankModal").style.display = "flex"
   }
 
   function drawPlayerCosmetics(ctx, playerObj) {
@@ -678,28 +1257,117 @@ window.Robolingo = (() => {
 
     ctx.save()
 
-    // Aura Dourada
-    if (state.equipped === 'aura') {
-      ctx.strokeStyle = 'rgba(250, 204, 21, 0.85)'
+    if (state.equipped === "aura") {
+      ctx.strokeStyle = "rgba(250, 204, 21, 0.85)"
       ctx.lineWidth = 3
       ctx.beginPath()
       ctx.ellipse(x + w / 2, y + h - 8, 22, 10, 0, 0, Math.PI * 2)
       ctx.stroke()
     }
 
-    // Acessórios na cabeça
-    if (state.equipped === 'cap') {
-      ctx.fillStyle = '#2563eb'
+    if (state.equipped === "cap") {
+      ctx.fillStyle = "#2563eb"
       ctx.fillRect(x + 12, y + 4, 24, 8)
-      ctx.fillStyle = '#60a5fa'
+      ctx.fillStyle = "#60a5fa"
       ctx.fillRect(x + 16, y + 10, 20, 4)
-    } else if (state.equipped === 'crown') {
-      ctx.fillStyle = '#facc15'
+    } else if (state.equipped === "crown") {
+      ctx.fillStyle = "#facc15"
       ctx.fillRect(x + 14, y + 2, 20, 7)
       ctx.fillRect(x + 14, y - 3, 4, 5)
       ctx.fillRect(x + 22, y - 4, 4, 6)
       ctx.fillRect(x + 30, y - 3, 4, 5)
-    } else if (state.equipped === 'headset') {
-      ctx.fillStyle = '#a855f7'
+    } else if (state.equipped === "headset") {
+      ctx.fillStyle = "#a855f7"
       ctx.fillRect(x + 11, y + 4, 26, 4)
-      ctx.fillStyle
+      ctx.fillStyle = "#22d3ee"
+      ctx.fillRect(x + 9, y + 8, 5, 10)
+      ctx.fillRect(x + 34, y + 8, 5, 10)
+    } else if (state.equipped === "glasses") {
+      ctx.fillStyle = "#0f172a"
+      ctx.fillRect(x + 14, y + 16, 20, 5)
+      ctx.fillStyle = "#38bdf8"
+      ctx.fillRect(x + 15, y + 17, 7, 3)
+      ctx.fillRect(x + 26, y + 17, 7, 3)
+    }
+
+    ctx.font = 'bold 10px "Press Start 2P", monospace'
+    const label = `${state.name} [Nv.${state.level}]`
+    const textW = ctx.measureText(label).width
+    ctx.fillStyle = "rgba(15, 23, 42, 0.78)"
+    ctx.fillRect(x + w / 2 - textW / 2 - 6, y - 22, textW + 12, 16)
+    ctx.fillStyle = "#facc15"
+    ctx.fillText(label, x + w / 2 - textW / 2, y - 10)
+
+    ctx.restore()
+  }
+
+  function bindTouchControls() {
+    const dirButtons = document.querySelectorAll("[data-dir]")
+    dirButtons.forEach((btn) => {
+      const dir = btn.getAttribute("data-dir")
+      const press = (e) => {
+        e.preventDefault()
+        if (typeof keys !== "undefined" && keys[dir]) {
+          keys[dir].pressed = true
+          if (typeof lastKey !== "undefined") window.lastKey = dir
+        }
+      }
+      const release = (e) => {
+        e.preventDefault()
+        if (typeof keys !== "undefined" && keys[dir]) {
+          keys[dir].pressed = false
+        }
+      }
+      btn.addEventListener("touchstart", press, { passive: false })
+      btn.addEventListener("touchend", release, { passive: false })
+      btn.addEventListener("touchcancel", release, { passive: false })
+      btn.addEventListener("mousedown", press)
+      btn.addEventListener("mouseup", release)
+      btn.addEventListener("mouseleave", release)
+    })
+
+    const actionBtn = document.getElementById("btnMobileAction")
+    if (actionBtn) {
+      const act = (e) => {
+        e.preventDefault()
+        if (typeof window.triggerInteraction === "function") {
+          window.triggerInteraction()
+        }
+      }
+      actionBtn.addEventListener("touchstart", act, { passive: false })
+      actionBtn.addEventListener("click", act)
+    }
+  }
+
+  function init() {
+    loadState()
+    updateHUD()
+    bindTouchControls()
+
+    if (!state.registered) {
+      openLoginModal()
+    }
+  }
+
+  return {
+    init,
+    openLoginModal,
+    submitLogin,
+    openMission,
+    openShop,
+    openRanking,
+    closeAllModals,
+    revealListeningText,
+    speakCurrent: () => currentQuestion && speakEnglish(currentQuestion.en, 0.92),
+    speakSlow: () => currentQuestion && speakEnglish(currentQuestion.en, 0.62),
+    drawPlayerCosmetics,
+    isModalOpen,
+    getNpcGreeting: () => {
+      const themeInfo = THEMES[state.theme] || THEMES.games
+      return [
+        `Hello, ${state.name}! I am ${themeInfo.npcName}.`,
+        "Ready for an English challenge? Press Space or tap Falar!"
+      ]
+    }
+  }
+})()
