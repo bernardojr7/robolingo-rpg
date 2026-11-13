@@ -1,5 +1,4 @@
 window.Robolingo = (() => {
-  // Senha de acesso ao Painel do Professor (altere aqui se desejar)
   const TEACHER_PIN = "2026"
   const SALT = "ROBOLINGO_EDU_2026"
 
@@ -10,7 +9,16 @@ window.Robolingo = (() => {
       shortTag: "🎮 Axel",
       hatColor: "#2563eb",
       accentColor: "#38bdf8",
-      spriteType: "villager"
+      outfitColor: "#1d4ed8",
+      hairColor: "#06b6d4",
+      skinColor: "#f8c9a0",
+      spriteType: "villager",
+      introEn: "Welcome to my zone! Ready to level up your English?",
+      introPt:
+        "E aí, {name}! Pronto para dar um <span class='jrpg-kw'>level up</span> no seu inglês com <span class='jrpg-kw'>quests</span> de Games & Tech?",
+      replyEn: "Yes! Let's start the quest!",
+      replyPt:
+        "Com certeza! <span class='jrpg-kw'>Let's start</span> o desafio agora mesmo!"
     },
     manga: {
       label: "📚 HQs & Mangá",
@@ -18,7 +26,16 @@ window.Robolingo = (() => {
       shortTag: "📚 Kenji",
       hatColor: "#dc2626",
       accentColor: "#f87171",
-      spriteType: "villager"
+      outfitColor: "#991b1b",
+      hairColor: "#1e293b",
+      skinColor: "#f3c19d",
+      spriteType: "villager",
+      introEn: "True heroes train every day! Shall we read the next chapter?",
+      introPt:
+        "Verdadeiros heróis treinam todo dia, {name}! Vamos ler o próximo <span class='jrpg-kw'>chapter</span> juntos?",
+      replyEn: "I am ready, Sensei!",
+      replyPt:
+        "Estou pronto! <span class='jrpg-kw'>Never give up</span>!"
     },
     cooking: {
       label: "🍔 Culinária",
@@ -26,7 +43,16 @@ window.Robolingo = (() => {
       shortTag: "🍔 Mia",
       hatColor: "#f8fafc",
       accentColor: "#fb923c",
-      spriteType: "villager"
+      outfitColor: "#ea580c",
+      hairColor: "#92400e",
+      skinColor: "#f8c9a0",
+      spriteType: "villager",
+      introEn: "Something smells delicious! Let's cook up new English words.",
+      introPt:
+        "Algo <span class='jrpg-kw'>smells delicious</span> por aqui, {name}! Vamos preparar novas palavras em inglês?",
+      replyEn: "Sounds delicious! Let's cook!",
+      replyPt:
+        "Parece ótimo, Chef! <span class='jrpg-kw'>Let's go</span>!"
     },
     fashion: {
       label: "👟 Moda & Estilo",
@@ -34,7 +60,16 @@ window.Robolingo = (() => {
       shortTag: "👟 Chloe",
       hatColor: "#db2777",
       accentColor: "#f472b6",
-      spriteType: "villager"
+      outfitColor: "#be185d",
+      hairColor: "#ec4899",
+      skinColor: "#e0a370",
+      spriteType: "villager",
+      introEn: "Style is how you express yourself! Ready for a fashion challenge?",
+      introPt:
+        "Estilo é como você <span class='jrpg-kw'>express yourself</span>, {name}! Bora encarar um desafio de moda?",
+      replyEn: "Totally! Show me the challenge!",
+      replyPt:
+        "Com certeza! <span class='jrpg-kw'>Awesome</span>, vamos nessa!"
     },
     science: {
       label: "🔬 Ciências",
@@ -42,7 +77,16 @@ window.Robolingo = (() => {
       shortTag: "🔬 Dr. Nova",
       hatColor: "#059669",
       accentColor: "#34d399",
-      spriteType: "oldMan"
+      outfitColor: "#f8fafc",
+      hairColor: "#cbd5e1",
+      skinColor: "#f1c29b",
+      spriteType: "oldMan",
+      introEn: "Every discovery begins with curiosity! Ready for an experiment?",
+      introPt:
+        "Toda descoberta começa com <span class='jrpg-kw'>curiosity</span>, {name}! Pronto para um experimento em inglês?",
+      replyEn: "Ready for science, Doctor!",
+      replyPt:
+        "Pronto para a ciência! <span class='jrpg-kw'>Let's explore</span>!"
     },
     movies: {
       label: "🎬 Filmes & Séries",
@@ -50,7 +94,16 @@ window.Robolingo = (() => {
       shortTag: "🎬 Leo",
       hatColor: "#d97706",
       accentColor: "#facc15",
-      spriteType: "oldMan"
+      outfitColor: "#1e293b",
+      hairColor: "#78350f",
+      skinColor: "#d99b66",
+      spriteType: "oldMan",
+      introEn: "Lights, camera, action! Your English scene is about to begin.",
+      introPt:
+        "<span class='jrpg-kw'>Lights, camera, action</span>, {name}! Sua próxima cena em inglês vai começar.",
+      replyEn: "Action! I'm ready for my scene!",
+      replyPt:
+        "<span class='jrpg-kw'>Action!</span> Estou pronto para gravar!"
     },
     reading: {
       label: "📖 Leitura",
@@ -58,8 +111,42 @@ window.Robolingo = (() => {
       shortTag: "📖 Clara",
       hatColor: "#7c3aed",
       accentColor: "#c084fc",
-      spriteType: "oldMan"
+      outfitColor: "#5b21b6",
+      hairColor: "#f1f5f9",
+      skinColor: "#f8c9a0",
+      spriteType: "oldMan",
+      introEn: "Books open doors to magical worlds. Shall we turn the page?",
+      introPt:
+        "Os livros abrem portas para <span class='jrpg-kw'>magical worlds</span>, {name}. Vamos virar a página?",
+      replyEn: "Yes! Let's turn the page!",
+      replyPt:
+        "Sim! <span class='jrpg-kw'>Turn the page</span> agora!"
     }
+  }
+
+  const AVATAR_OPTIONS = {
+    hair: [
+      { id: "brown", name: "Castanho", color: "#5c3a21" },
+      { id: "black", name: "Preto", color: "#1e293b" },
+      { id: "blonde", name: "Loiro", color: "#eab308" },
+      { id: "silver", name: "Branco", color: "#e2e8f0" },
+      { id: "cyan", name: "Azul Neon", color: "#06b6d4" },
+      { id: "pink", name: "Rosa", color: "#ec4899" }
+    ],
+    outfit: [
+      { id: "blue", name: "Azul", color: "#2563eb" },
+      { id: "red", name: "Vermelho", color: "#dc2626" },
+      { id: "green", name: "Verde", color: "#16a34a" },
+      { id: "purple", name: "Roxo", color: "#7c3aed" },
+      { id: "gold", name: "Dourado", color: "#d97706" },
+      { id: "dark", name: "Grafite", color: "#334155" }
+    ],
+    skin: [
+      { id: "light", name: "Claro", color: "#f8c9a0" },
+      { id: "warm", name: "Médio", color: "#eab07e" },
+      { id: "tan", name: "Moreno", color: "#c68642" },
+      { id: "deep", name: "Retinto", color: "#8d5524" }
+    ]
   }
 
   const MENTOR_SPOTS = [
@@ -803,7 +890,7 @@ window.Robolingo = (() => {
   }
 
   const SHOP_ITEMS = [
-    { id: "cap", slot: "hat", name: "🧢 Boné Azul", price: 0, desc: "Boné clássico da Academia" },
+    { id: "cap", slot: "hat", name: "🧢 Boné Clássico", price: 0, desc: "Boné da Academia" },
     { id: "headset", slot: "hat", name: "🎧 Headset Neon", price: 25, desc: "Fone gamer para ouvir inglês" },
     { id: "glasses", slot: "hat", name: "🕶️ Óculos Pixel", price: 45, desc: "Estilo lendário na vila" },
     { id: "crown", slot: "hat", name: "👑 Coroa de Ouro", price: 80, desc: "Para mestres do vocabulário" },
@@ -820,7 +907,7 @@ window.Robolingo = (() => {
     { name: "Mariana R.", theme: "🎬 Filmes & Séries", xp: 90 }
   ]
 
-  const STORAGE_KEY = "robolingo_rpg_save_v4"
+  const STORAGE_KEY = "robolingo_rpg_save_v6"
   const TEACHER_STORAGE_KEY = "robolingo_teacher_records_v1"
 
   let state = {
@@ -836,7 +923,12 @@ window.Robolingo = (() => {
     equippedPet: null,
     openedChests: [],
     solvedCount: 0,
-    totalAttempts: 0
+    totalAttempts: 0,
+    avatarHair: "brown",
+    avatarOutfit: "blue",
+    avatarSkin: "light",
+    zoom: 1.0,
+    showMinimap: true
   }
 
   let teacherRecords = []
@@ -852,12 +944,44 @@ window.Robolingo = (() => {
   let activeChest = null
   let petPos = { x: null, y: null }
 
+  // Estado dos Diálogos JRPG / Visual Novel
+  let dialogueState = {
+    active: false,
+    lines: [],
+    index: 0,
+    charIndex: 0,
+    fullPlainText: "",
+    fullHtmlText: "",
+    timer: null,
+    onComplete: null
+  }
+
+  let customSpriteCache = null
+  let customSpriteKey = ""
+  let minimapBaseCanvas = null
+
+  function hexToRgb(hex) {
+    const clean = hex.replace("#", "")
+    const num = parseInt(clean, 16)
+    return {
+      r: (num >> 16) & 255,
+      g: (num >> 8) & 255,
+      b: num & 255
+    }
+  }
+
+  function getOptionColor(group, id) {
+    const list = AVATAR_OPTIONS[group] || []
+    const found = list.find((item) => item.id === id) || list[0]
+    return found ? found.color : "#2563eb"
+  }
+
   function loadState() {
     try {
       const raw =
         localStorage.getItem(STORAGE_KEY) ||
-        localStorage.getItem("robolingo_rpg_save_v3") ||
-        localStorage.getItem("robolingo_rpg_save_v2")
+        localStorage.getItem("robolingo_rpg_save_v5") ||
+        localStorage.getItem("robolingo_rpg_save_v4")
       if (raw) {
         state = { ...state, ...JSON.parse(raw) }
         if (!state.totalAttempts || state.totalAttempts < state.solvedCount) {
@@ -973,6 +1097,13 @@ window.Robolingo = (() => {
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35)
         osc.start()
         osc.stop(ctx.currentTime + 0.35)
+      } else if (type === "blip") {
+        osc.type = "square"
+        osc.frequency.setValueAtTime(480 + Math.random() * 140, ctx.currentTime)
+        gain.gain.setValueAtTime(0.025, ctx.currentTime)
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04)
+        osc.start()
+        osc.stop(ctx.currentTime + 0.04)
       } else {
         osc.type = "sine"
         osc.frequency.setValueAtTime(660, ctx.currentTime)
@@ -1005,6 +1136,7 @@ window.Robolingo = (() => {
     const hudCoins = document.getElementById("hudCoins")
     const hudStreak = document.getElementById("hudStreak")
     const hudChests = document.getElementById("hudChests")
+    const hudZoom = document.getElementById("hudZoomBtn")
 
     if (!hudName) return
     const themeInfo = THEMES[state.theme] || THEMES.games
@@ -1015,6 +1147,10 @@ window.Robolingo = (() => {
 
     if (hudChests) {
       hudChests.textContent = `${state.openedChests.length}/${CHEST_SPOTS.length}`
+    }
+
+    if (hudZoom) {
+      hudZoom.textContent = `🔍 ${state.zoom.toFixed(2).replace(".00", ".0")}x`
     }
 
     if (hudStreak) {
@@ -1029,7 +1165,29 @@ window.Robolingo = (() => {
     }
   }
 
+  function cycleZoom() {
+    const levels = [0.75, 1.0, 1.25]
+    const idx = levels.findIndex((z) => Math.abs(z - state.zoom) < 0.05)
+    state.zoom = levels[(idx + 1) % levels.length]
+    saveState()
+    playTone("click")
+    if (typeof window.syncViewportCamera === "function") {
+      window.syncViewportCamera()
+    }
+  }
+
+  function toggleMinimap() {
+    state.showMinimap = !state.showMinimap
+    saveState()
+    const mm = document.getElementById("minimapBox")
+    if (mm) {
+      mm.style.opacity = state.showMinimap ? "1" : "0.35"
+    }
+    playTone("click")
+  }
+
   function isModalOpen() {
+    if (dialogueState.active) return true
     return [
       "loginModal",
       "missionModal",
@@ -1045,6 +1203,14 @@ window.Robolingo = (() => {
   }
 
   function closeAllModals() {
+    if (dialogueState.timer) {
+      clearInterval(dialogueState.timer)
+      dialogueState.timer = null
+    }
+    dialogueState.active = false
+    const dlgOverlay = document.getElementById("jrpgDialogueOverlay")
+    if (dlgOverlay) dlgOverlay.style.display = "none"
+
     ;[
       "missionModal",
       "shopModal",
@@ -1061,6 +1227,247 @@ window.Robolingo = (() => {
     }
   }
 
+  // =========================================================================
+  // RETRATOS PIXEL ART ESTILO JRPG / VISUAL NOVEL (32x32 -> 160x160)
+  // =========================================================================
+  function drawPixelBustPortrait(canvasEl, profile) {
+    if (!canvasEl) return
+    const ctx = canvasEl.getContext("2d")
+    const size = 32
+    const off = document.createElement("canvas")
+    off.width = size
+    off.height = size
+    const p = off.getContext("2d")
+
+    const skin = profile.skinColor || "#f8c9a0"
+    const skinShadow = "#c68642"
+    const hair = profile.hairColor || "#5c3a21"
+    const outfit = profile.outfitColor || "#2563eb"
+    const accent = profile.accentColor || "#38bdf8"
+    const eyeColor = profile.eyeColor || "#0f172a"
+
+    p.clearRect(0, 0, size, size)
+
+    // Capa / fundo de ombros para Mestra Clara ou aura
+    if (profile.style === "reading" || profile.hat === "aura") {
+      p.fillStyle = profile.hat === "aura" ? "#facc15" : "#4c1d95"
+      p.fillRect(5, 19, 22, 13)
+    }
+
+    // Tronco / Roupa
+    p.fillStyle = outfit
+    p.fillRect(7, 21, 18, 11)
+    p.fillStyle = "#0f172a"
+    p.fillRect(6, 22, 1, 10)
+    p.fillRect(25, 22, 1, 10)
+
+    // Detalhes do uniforme por personagem
+    if (profile.style === "science") {
+      // Jaleco branco com gravata verde
+      p.fillStyle = "#f8fafc"
+      p.fillRect(7, 21, 18, 11)
+      p.fillStyle = "#059669"
+      p.fillRect(15, 22, 2, 8)
+    } else if (profile.style === "cooking") {
+      // Dólmã de chef branco com lenço laranja
+      p.fillStyle = "#f8fafc"
+      p.fillRect(7, 21, 18, 11)
+      p.fillStyle = "#fb923c"
+      p.fillRect(11, 21, 10, 3)
+    } else if (profile.style === "games") {
+      // Jaqueta gamer com faixa neon
+      p.fillStyle = "#1e3a8a"
+      p.fillRect(7, 21, 18, 11)
+      p.fillStyle = "#38bdf8"
+      p.fillRect(10, 21, 2, 11)
+      p.fillRect(20, 21, 2, 11)
+    } else if (profile.style === "manga") {
+      // Túnica vermelha com gola dourada
+      p.fillStyle = "#b91c1c"
+      p.fillRect(7, 21, 18, 11)
+      p.fillStyle = "#facc15"
+      p.fillRect(11, 21, 10, 2)
+    } else if (profile.style === "movies") {
+      // Blazer escuro com cachecol dourado
+      p.fillStyle = "#1e293b"
+      p.fillRect(7, 21, 18, 11)
+      p.fillStyle = "#facc15"
+      p.fillRect(13, 21, 6, 9)
+    } else {
+      // Gola estilizada
+      p.fillStyle = accent
+      p.fillRect(12, 21, 8, 2)
+    }
+
+    // Pescoço
+    p.fillStyle = skinShadow
+    p.fillRect(14, 18, 4, 3)
+
+    // Cabelo atrás (para cabelos longos como Clara, Chloe, Mia)
+    if (profile.style === "reading" || profile.style === "fashion" || profile.style === "cooking") {
+      p.fillStyle = hair
+      p.fillRect(7, 8, 18, 15)
+    }
+
+    // Rosto
+    p.fillStyle = skin
+    p.fillRect(10, 8, 12, 11)
+    p.fillStyle = skinShadow
+    p.fillRect(10, 17, 12, 2)
+
+    // Olhos expressivos estilo JRPG
+    p.fillStyle = "#ffffff"
+    p.fillRect(11, 12, 3, 3)
+    p.fillRect(18, 12, 3, 3)
+    p.fillStyle = eyeColor
+    p.fillRect(12, 12, 2, 3)
+    p.fillRect(19, 12, 2, 3)
+
+    // Rubor suave + boca
+    p.fillStyle = "#f472b6"
+    p.fillRect(10, 15, 2, 1)
+    p.fillRect(20, 15, 2, 1)
+    p.fillStyle = "#9f1239"
+    p.fillRect(15, 16, 2, 1)
+
+    // Cabelo frontal / Franja
+    p.fillStyle = hair
+    p.fillRect(9, 5, 14, 4)
+    p.fillRect(9, 8, 2, 6)
+    p.fillRect(21, 8, 2, 6)
+    p.fillRect(12, 8, 3, 2)
+    p.fillRect(17, 8, 2, 2)
+
+    // Acessórios / Chapéus exclusivos
+    if (profile.style === "cooking") {
+      // Chapéu de Chef
+      p.fillStyle = "#ffffff"
+      p.fillRect(10, 1, 12, 5)
+      p.fillRect(9, 2, 14, 3)
+    } else if (profile.style === "manga") {
+      // Bandana ninja vermelha
+      p.fillStyle = "#ef4444"
+      p.fillRect(9, 7, 14, 2)
+      p.fillStyle = "#cbd5e1"
+      p.fillRect(13, 7, 6, 2)
+    } else if (profile.style === "science") {
+      // Óculos de laboratório na testa
+      p.fillStyle = "#34d399"
+      p.fillRect(10, 6, 5, 2)
+      p.fillRect(17, 6, 5, 2)
+    } else if (profile.style === "movies") {
+      // Boina de diretor
+      p.fillStyle = "#d97706"
+      p.fillRect(9, 4, 15, 3)
+    } else if (profile.style === "reading") {
+      // Capuz mágico roxo
+      p.fillStyle = "#6d28d9"
+      p.fillRect(8, 4, 16, 3)
+      p.fillRect(8, 6, 2, 12)
+      p.fillRect(22, 6, 2, 12)
+    }
+
+    // Itens equipados pelo aluno (ou headset do Axel / óculos da Chloe)
+    if (profile.hat === "cap") {
+      p.fillStyle = "#2563eb"
+      p.fillRect(9, 4, 14, 3)
+      p.fillStyle = "#60a5fa"
+      p.fillRect(12, 6, 12, 2)
+    } else if (profile.hat === "crown") {
+      p.fillStyle = "#facc15"
+      p.fillRect(10, 3, 12, 3)
+      p.fillRect(10, 1, 2, 2)
+      p.fillRect(15, 1, 2, 2)
+      p.fillRect(20, 1, 2, 2)
+    } else if (profile.hat === "headset" || profile.style === "games") {
+      p.fillStyle = "#a855f7"
+      p.fillRect(8, 5, 16, 2)
+      p.fillStyle = "#22d3ee"
+      p.fillRect(7, 10, 3, 5)
+      p.fillRect(22, 10, 3, 5)
+    } else if (profile.hat === "glasses" || profile.style === "fashion") {
+      p.fillStyle = "#0f172a"
+      p.fillRect(10, 12, 12, 3)
+      p.fillStyle = "#38bdf8"
+      p.fillRect(11, 12, 4, 2)
+      p.fillRect(17, 12, 4, 2)
+    }
+
+    ctx.clearRect(0, 0, canvasEl.width, canvasEl.height)
+    ctx.imageSmoothingEnabled = false
+    ctx.drawImage(off, 0, 0, canvasEl.width, canvasEl.height)
+  }
+
+  function drawMascotIcon(canvasEl, themeKey) {
+    if (!canvasEl) return
+    const ctx = canvasEl.getContext("2d")
+    const theme = THEMES[themeKey] || THEMES.games
+    const off = document.createElement("canvas")
+    off.width = 16
+    off.height = 16
+    const p = off.getContext("2d")
+
+    // Mini robô/mascotes estilo pixel art (como o emblema na caixa das imagens 1 e 2)
+    p.fillStyle = theme.accentColor
+    p.fillRect(3, 4, 10, 9)
+    p.fillStyle = "#facc15"
+    p.fillRect(7, 1, 2, 3)
+    p.fillStyle = "#0f172a"
+    p.fillRect(5, 7, 2, 2)
+    p.fillRect(9, 7, 2, 2)
+    p.fillStyle = "#ffffff"
+    p.fillRect(6, 10, 4, 1)
+
+    ctx.clearRect(0, 0, canvasEl.width, canvasEl.height)
+    ctx.imageSmoothingEnabled = false
+    ctx.drawImage(off, 0, 0, canvasEl.width, canvasEl.height)
+  }
+
+  function renderAvatarSwatches() {
+    const groups = [
+      { key: "hair", stateProp: "avatarHair", containerId: "swatchHair" },
+      { key: "outfit", stateProp: "avatarOutfit", containerId: "swatchOutfit" },
+      { key: "skin", stateProp: "avatarSkin", containerId: "swatchSkin" }
+    ]
+
+    groups.forEach((g) => {
+      const box = document.getElementById(g.containerId)
+      if (!box) return
+      box.innerHTML = ""
+      AVATAR_OPTIONS[g.key].forEach((opt) => {
+        const btn = document.createElement("button")
+        btn.type = "button"
+        btn.title = opt.name
+        btn.style.width = "26px"
+        btn.style.height = "26px"
+        btn.style.borderRadius = "6px"
+        btn.style.background = opt.color
+        btn.style.border =
+          state[g.stateProp] === opt.id ? "3px solid #facc15" : "2px solid #475569"
+        btn.onclick = () => {
+          state[g.stateProp] = opt.id
+          customSpriteCache = null
+          playTone("click")
+          renderAvatarSwatches()
+          updateAvatarPreview()
+        }
+        box.appendChild(btn)
+      })
+    })
+  }
+
+  function updateAvatarPreview() {
+    const preview = document.getElementById("avatarPreviewCanvas")
+    if (!preview) return
+    drawPixelBustPortrait(preview, {
+      hairColor: getOptionColor("hair", state.avatarHair),
+      outfitColor: getOptionColor("outfit", state.avatarOutfit),
+      skinColor: getOptionColor("skin", state.avatarSkin),
+      accentColor: "#facc15",
+      hat: state.equipped
+    })
+  }
+
   function openLoginModal() {
     const modal = document.getElementById("loginModal")
     if (!modal) return
@@ -1068,6 +1475,8 @@ window.Robolingo = (() => {
       state.name !== "Explorador" ? state.name : ""
     document.getElementById("selectStudentTheme").value = state.theme
     document.getElementById("selectStudentLevel").value = String(state.level)
+    renderAvatarSwatches()
+    updateAvatarPreview()
     modal.style.display = "flex"
   }
 
@@ -1080,6 +1489,7 @@ window.Robolingo = (() => {
     state.theme = themeVal
     state.level = levelVal
     state.registered = true
+    customSpriteCache = null
     saveState()
     playTone("win")
 
@@ -1089,6 +1499,245 @@ window.Robolingo = (() => {
     }
   }
 
+  // Recoloração dinâmica dos sprites do aluno no mapa
+  function recolorSpriteImage(img, outfitHex, hairHex, skinHex) {
+    if (!img || !img.complete || img.width === 0) return img
+    try {
+      const c = document.createElement("canvas")
+      c.width = img.width
+      c.height = img.height
+      const ctx = c.getContext("2d")
+      ctx.drawImage(img, 0, 0)
+      const imgData = ctx.getImageData(0, 0, c.width, c.height)
+      const d = imgData.data
+
+      const outfitRgb = hexToRgb(outfitHex)
+      const hairRgb = hexToRgb(hairHex)
+      const skinRgb = hexToRgb(skinHex)
+
+      for (let i = 0; i < d.length; i += 4) {
+        const a = d[i + 3]
+        if (a < 128) continue
+        const r = d[i]
+        const g = d[i + 1]
+        const b = d[i + 2]
+
+        // Roupa/Boné vermelho original -> Cor escolhida pelo aluno
+        if (r > 135 && g < 95 && b < 95) {
+          const lum = r / 220
+          d[i] = Math.min(255, Math.round(outfitRgb.r * lum))
+          d[i + 1] = Math.min(255, Math.round(outfitRgb.g * lum))
+          d[i + 2] = Math.min(255, Math.round(outfitRgb.b * lum))
+        }
+        // Cabelo escuro original -> Cor de cabelo escolhida
+        else if (r > 25 && r < 85 && g > 20 && g < 75 && b > 20 && b < 75) {
+          const lum = (r + g + b) / 150
+          d[i] = Math.min(255, Math.round(hairRgb.r * Math.max(0.65, lum)))
+          d[i + 1] = Math.min(255, Math.round(hairRgb.g * Math.max(0.65, lum)))
+          d[i + 2] = Math.min(255, Math.round(hairRgb.b * Math.max(0.65, lum)))
+        }
+        // Tom de pele
+        else if (r > 195 && g > 135 && g < 215 && b > 95 && b < 185 && r > g && g > b) {
+          const lum = r / 245
+          d[i] = Math.min(255, Math.round(skinRgb.r * lum))
+          d[i + 1] = Math.min(255, Math.round(skinRgb.g * lum))
+          d[i + 2] = Math.min(255, Math.round(skinRgb.b * lum))
+        }
+      }
+
+      ctx.putImageData(imgData, 0, 0)
+      return c
+    } catch (_) {
+      return img
+    }
+  }
+
+  function getCustomPlayerSprites(baseSprites) {
+    if (!baseSprites) return baseSprites
+    const key = `${state.avatarOutfit}_${state.avatarHair}_${state.avatarSkin}`
+    if (customSpriteCache && customSpriteKey === key) {
+      return customSpriteCache
+    }
+    if (
+      !baseSprites.down.complete ||
+      !baseSprites.up.complete ||
+      !baseSprites.left.complete ||
+      !baseSprites.right.complete
+    ) {
+      return baseSprites
+    }
+
+    const outfitHex = getOptionColor("outfit", state.avatarOutfit)
+    const hairHex = getOptionColor("hair", state.avatarHair)
+    const skinHex = getOptionColor("skin", state.avatarSkin)
+
+    customSpriteKey = key
+    customSpriteCache = {
+      down: recolorSpriteImage(baseSprites.down, outfitHex, hairHex, skinHex),
+      up: recolorSpriteImage(baseSprites.up, outfitHex, hairHex, skinHex),
+      left: recolorSpriteImage(baseSprites.left, outfitHex, hairHex, skinHex),
+      right: recolorSpriteImage(baseSprites.right, outfitHex, hairHex, skinHex)
+    }
+    return customSpriteCache
+  }
+
+  // =========================================================================
+  // SISTEMA DE DIÁLOGO JRPG / VISUAL NOVEL
+  // =========================================================================
+  function stripHtmlTags(html) {
+    const tmp = document.createElement("div")
+    tmp.innerHTML = html
+    return tmp.textContent || tmp.innerText || ""
+  }
+
+  function renderCurrentDialogueLine() {
+    const line = dialogueState.lines[dialogueState.index]
+    if (!line) return
+
+    const nameEl = document.getElementById("jrpgSpeakerName")
+    const roleEl = document.getElementById("jrpgSpeakerRole")
+    const textEl = document.getElementById("jrpgDialogueText")
+    const leftWrap = document.getElementById("jrpgLeftWrap")
+    const rightWrap = document.getElementById("jrpgRightWrap")
+    const nextHint = document.getElementById("jrpgNextHint")
+
+    nameEl.textContent = line.speaker
+    roleEl.textContent = line.role || ""
+
+    if (line.side === "left") {
+      leftWrap.classList.add("speaking")
+      leftWrap.classList.remove("listening")
+      rightWrap.classList.add("listening")
+      rightWrap.classList.remove("speaking")
+    } else {
+      rightWrap.classList.add("speaking")
+      rightWrap.classList.remove("listening")
+      leftWrap.classList.add("listening")
+      leftWrap.classList.remove("speaking")
+    }
+
+    if (dialogueState.timer) {
+      clearInterval(dialogueState.timer)
+      dialogueState.timer = null
+    }
+
+    dialogueState.fullHtmlText = line.html
+    dialogueState.fullPlainText = stripHtmlTags(line.html)
+    dialogueState.charIndex = 0
+    textEl.textContent = ""
+    nextHint.textContent =
+      dialogueState.index === dialogueState.lines.length - 1 ? "▶ Iniciar Missão" : "▼"
+
+    dialogueState.timer = setInterval(() => {
+      dialogueState.charIndex += 2
+      if (dialogueState.charIndex >= dialogueState.fullPlainText.length) {
+        clearInterval(dialogueState.timer)
+        dialogueState.timer = null
+        textEl.innerHTML = dialogueState.fullHtmlText
+      } else {
+        textEl.textContent = dialogueState.fullPlainText.slice(0, dialogueState.charIndex)
+        if (dialogueState.charIndex % 6 === 0) {
+          playTone("blip")
+        }
+      }
+    }, 24)
+
+    if (line.speechEn) {
+      setTimeout(() => speakEnglish(line.speechEn, 0.94), 120)
+    }
+  }
+
+  function startNpcDialogue(npc) {
+    closeAllModals()
+    if (typeof battle !== "undefined") battle.initiated = true
+
+    const themeKey = npc && npc.themeKey ? npc.themeKey : state.theme
+    const theme = THEMES[themeKey] || THEMES.games
+
+    // Desenha os 2 retratos (Aluno à esquerda, Mentor à direita)
+    drawPixelBustPortrait(document.getElementById("jrpgLeftCanvas"), {
+      hairColor: getOptionColor("hair", state.avatarHair),
+      outfitColor: getOptionColor("outfit", state.avatarOutfit),
+      skinColor: getOptionColor("skin", state.avatarSkin),
+      accentColor: "#facc15",
+      hat: state.equipped
+    })
+
+    drawPixelBustPortrait(document.getElementById("jrpgRightCanvas"), {
+      style: themeKey,
+      hairColor: theme.hairColor,
+      outfitColor: theme.outfitColor,
+      skinColor: theme.skinColor,
+      accentColor: theme.accentColor,
+      eyeColor: themeKey === "reading" ? "#059669" : "#0f172a"
+    })
+
+    drawMascotIcon(document.getElementById("jrpgMascotCanvas"), themeKey)
+
+    dialogueState.active = true
+    dialogueState.index = 0
+    dialogueState.lines = [
+      {
+        side: "right",
+        speaker: theme.npcName,
+        role: theme.label,
+        html: theme.introPt.replace("{name}", state.name),
+        speechEn: theme.introEn
+      },
+      {
+        side: "left",
+        speaker: state.name,
+        role: `Nv.${state.level} • Explorador`,
+        html: theme.replyPt,
+        speechEn: theme.replyEn
+      }
+    ]
+    dialogueState.onComplete = () => {
+      openMission("npc", themeKey)
+    }
+
+    document.getElementById("jrpgDialogueOverlay").style.display = "flex"
+    renderCurrentDialogueLine()
+  }
+
+  function advanceDialogue() {
+    if (!dialogueState.active) return
+
+    // Se ainda estiver digitando, completa instantaneamente
+    if (dialogueState.timer) {
+      clearInterval(dialogueState.timer)
+      dialogueState.timer = null
+      document.getElementById("jrpgDialogueText").innerHTML = dialogueState.fullHtmlText
+      playTone("click")
+      return
+    }
+
+    dialogueState.index += 1
+    if (dialogueState.index < dialogueState.lines.length) {
+      playTone("click")
+      renderCurrentDialogueLine()
+    } else {
+      const callback = dialogueState.onComplete
+      dialogueState.active = false
+      document.getElementById("jrpgDialogueOverlay").style.display = "none"
+      if (typeof callback === "function") {
+        callback()
+      } else if (typeof battle !== "undefined") {
+        battle.initiated = false
+      }
+    }
+  }
+
+  function speakDialogueLine() {
+    const line = dialogueState.lines[dialogueState.index]
+    if (line && line.speechEn) {
+      speakEnglish(line.speechEn, 0.92)
+    }
+  }
+
+  // =========================================================================
+  // MISSÕES, BAÚS, LOJA, RANKING E PAINEL DO PROFESSOR
+  // =========================================================================
   function getRandomQuestion(themeKey) {
     const targetTheme = THEMES[themeKey] ? themeKey : state.theme
     const themeBank = QUESTIONS[targetTheme] || QUESTIONS.games
@@ -1658,7 +2307,7 @@ window.Robolingo = (() => {
     if (invalidCount > 0) {
       playTone("wrong")
       statusEl.style.color = "#fcd34d"
-      statusEl.textContent = `✅ ${validCount} importado(s) | 🚨 ${invalidCount} código(s) inválido(s) ou adulterado(s) ignorado(s).`
+      statusEl.textContent = `✅ ${validCount} importado(s) | 🚨 ${invalidCount} código(s) inválido(s) ignorado(s).`
     } else {
       playTone("win")
       statusEl.style.color = "#4ade80"
@@ -1725,10 +2374,9 @@ window.Robolingo = (() => {
     ].join(";")
 
     const rows = teacherRecords.map((r, idx) => {
-      const themeLabel = (THEMES[r.theme] ? THEMES[r.theme].label : r.theme).replace(
-        /[^\w\sÀ-ÿ&]/g,
-        ""
-      ).trim()
+      const themeLabel = (THEMES[r.theme] ? THEMES[r.theme].label : r.theme)
+        .replace(/[^\w\sÀ-ÿ&]/g, "")
+        .trim()
       return [
         idx + 1,
         `"${r.name.replace(/"/g, '""')}"`,
@@ -1762,30 +2410,82 @@ window.Robolingo = (() => {
     playTone("click")
   }
 
+  // =========================================================================
+  // DESENHO DOS 7 MENTORES ÚNICOS, BAÚS, PETS E MINIMAPA
+  // =========================================================================
   function drawNpcDecorations(ctx, char) {
-    const themeInfo = THEMES[char.themeKey] || THEMES.games
+    const themeKey = char.themeKey || "games"
+    const themeInfo = THEMES[themeKey] || THEMES.games
     const x = char.position.x
     const y = char.position.y
     const w = char.width || 48
+    const floatY = Math.sin(Date.now() / 220 + x) * 2.5
 
     ctx.save()
 
-    ctx.fillStyle = themeInfo.hatColor
-    ctx.fillRect(x + 12, y + 2, 24, 7)
-    ctx.fillStyle = themeInfo.accentColor
-    ctx.fillRect(x + 15, y + 7, 18, 3)
+    // Uniformes & detalhes únicos no corpo de cada Mentor
+    if (themeKey === "science") {
+      // Jaleco branco do Dr. Nova
+      ctx.fillStyle = "#f8fafc"
+      ctx.fillRect(x + 12, y + 34, 24, 22)
+      ctx.fillStyle = "#059669"
+      ctx.fillRect(x + 22, y + 36, 4, 14)
+    } else if (themeKey === "cooking") {
+      // Chapéu alto e avental da Chef Mia
+      ctx.fillStyle = "#ffffff"
+      ctx.fillRect(x + 14, y - 3, 20, 10)
+      ctx.fillStyle = "#fb923c"
+      ctx.fillRect(x + 14, y + 36, 20, 18)
+    } else if (themeKey === "games") {
+      // Headset neon + jaqueta gamer do Mentor Axel
+      ctx.fillStyle = "#2563eb"
+      ctx.fillRect(x + 12, y + 34, 24, 18)
+      ctx.fillStyle = "#38bdf8"
+      ctx.fillRect(x + 9, y + 12, 5, 10)
+      ctx.fillRect(x + 34, y + 12, 5, 10)
+    } else if (themeKey === "manga") {
+      // Bandana vermelha + túnica do Sensei Kenji
+      ctx.fillStyle = "#dc2626"
+      ctx.fillRect(x + 11, y + 9, 26, 5)
+      ctx.fillRect(x + 12, y + 34, 24, 18)
+    } else if (themeKey === "fashion") {
+      // Óculos pixel + jaqueta rosa da Stylist Chloe
+      ctx.fillStyle = "#db2777"
+      ctx.fillRect(x + 12, y + 34, 24, 18)
+      ctx.fillStyle = "#0f172a"
+      ctx.fillRect(x + 14, y + 16, 20, 5)
+      ctx.fillStyle = "#f472b6"
+      ctx.fillRect(x + 15, y + 17, 7, 3)
+      ctx.fillRect(x + 26, y + 17, 7, 3)
+    } else if (themeKey === "movies") {
+      // Boina + cachecol dourado do Diretor Leo
+      ctx.fillStyle = "#d97706"
+      ctx.fillRect(x + 11, y + 3, 26, 7)
+      ctx.fillStyle = "#facc15"
+      ctx.fillRect(x + 20, y + 34, 8, 18)
+    } else if (themeKey === "reading") {
+      // Manto mágico roxo da Mestra Clara
+      ctx.fillStyle = "#7c3aed"
+      ctx.fillRect(x + 11, y + 4, 26, 8)
+      ctx.fillRect(x + 11, y + 34, 26, 22)
+    }
 
+    // Placa com nome acima do Mentor
     ctx.font = 'bold 8px "Press Start 2P", monospace'
     const tag = themeInfo.shortTag
     const textW = ctx.measureText(tag).width
-    ctx.fillStyle = "rgba(15, 23, 42, 0.85)"
-    ctx.fillRect(x + w / 2 - textW / 2 - 5, y - 20, textW + 10, 14)
+    ctx.fillStyle = "rgba(15, 23, 42, 0.88)"
+    ctx.fillRect(x + w / 2 - textW / 2 - 5, y - 22, textW + 10, 14)
     ctx.strokeStyle = themeInfo.accentColor
     ctx.lineWidth = 1.5
-    ctx.strokeRect(x + w / 2 - textW / 2 - 5, y - 20, textW + 10, 14)
+    ctx.strokeRect(x + w / 2 - textW / 2 - 5, y - 22, textW + 10, 14)
 
     ctx.fillStyle = "#f8fafc"
-    ctx.fillText(tag, x + w / 2 - textW / 2, y - 10)
+    ctx.fillText(tag, x + w / 2 - textW / 2, y - 12)
+
+    // Ícone de missão (!) flutuante
+    ctx.fillStyle = "#facc15"
+    ctx.fillText("!", x + w / 2 - 4, y - 28 + floatY)
 
     ctx.restore()
   }
@@ -1909,9 +2609,9 @@ window.Robolingo = (() => {
     }
 
     if (state.equipped === "cap") {
-      ctx.fillStyle = "#2563eb"
+      ctx.fillStyle = getOptionColor("outfit", state.avatarOutfit)
       ctx.fillRect(x + 12, y + 4, 24, 8)
-      ctx.fillStyle = "#60a5fa"
+      ctx.fillStyle = "#93c5fd"
       ctx.fillRect(x + 16, y + 10, 20, 4)
     } else if (state.equipped === "crown") {
       ctx.fillStyle = "#facc15"
@@ -1933,15 +2633,83 @@ window.Robolingo = (() => {
       ctx.fillRect(x + 26, y + 17, 7, 3)
     }
 
-    ctx.font = 'bold 10px "Press Start 2P", monospace'
+    ctx.font = 'bold 9px "Press Start 2P", monospace'
     const label = `${state.name} [Nv.${state.level}]`
     const textW = ctx.measureText(label).width
-    ctx.fillStyle = "rgba(15, 23, 42, 0.78)"
+    ctx.fillStyle = "rgba(15, 23, 42, 0.82)"
     ctx.fillRect(x + w / 2 - textW / 2 - 6, y - 22, textW + 12, 16)
     ctx.fillStyle = "#facc15"
     ctx.fillText(label, x + w / 2 - textW / 2, y - 10)
 
     ctx.restore()
+  }
+
+  function buildMinimapBase(collisionsMap, battleZonesMap) {
+    const off = document.createElement("canvas")
+    off.width = 140
+    off.height = 80
+    const ctx = off.getContext("2d")
+
+    ctx.fillStyle = "#166534"
+    ctx.fillRect(0, 0, 140, 80)
+
+    for (let r = 0; r < collisionsMap.length; r++) {
+      for (let c = 0; c < collisionsMap[r].length; c++) {
+        if (collisionsMap[r][c] === 1025) {
+          ctx.fillStyle = "#0f172a"
+          ctx.fillRect(c * 2, r * 2, 2, 2)
+        } else if (battleZonesMap[r] && battleZonesMap[r][c] === 1025) {
+          ctx.fillStyle = "#22c55e"
+          ctx.fillRect(c * 2, r * 2, 2, 2)
+        }
+      }
+    }
+    return off
+  }
+
+  function drawMinimap(playerObj, backgroundObj, characters, chests, collisionsMap, battleZonesMap) {
+    const mmCanvas = document.getElementById("minimapCanvas")
+    if (!mmCanvas || !playerObj || !backgroundObj) return
+    const ctx = mmCanvas.getContext("2d")
+
+    if (!minimapBaseCanvas && collisionsMap && battleZonesMap) {
+      minimapBaseCanvas = buildMinimapBase(collisionsMap, battleZonesMap)
+    }
+
+    ctx.clearRect(0, 0, mmCanvas.width, mmCanvas.height)
+    if (minimapBaseCanvas) {
+      ctx.drawImage(minimapBaseCanvas, 0, 0, mmCanvas.width, mmCanvas.height)
+    }
+
+    const scaleX = mmCanvas.width / (70 * 48)
+    const scaleY = mmCanvas.height / (40 * 48)
+
+    // Baús ainda não abertos (pontos dourados)
+    chests.forEach((ch) => {
+      if (state.openedChests.includes(ch.id)) return
+      const wx = ch.position.x - backgroundObj.position.x + 24
+      const wy = ch.position.y - backgroundObj.position.y + 24
+      ctx.fillStyle = "#facc15"
+      ctx.fillRect(wx * scaleX - 2, wy * scaleY - 2, 4, 4)
+    })
+
+    // 7 Mentores (pontos ciano/coloridos)
+    characters.forEach((npc) => {
+      const theme = THEMES[npc.themeKey] || THEMES.games
+      const wx = npc.position.x - backgroundObj.position.x + 24
+      const wy = npc.position.y - backgroundObj.position.y + 34
+      ctx.fillStyle = theme.accentColor
+      ctx.fillRect(wx * scaleX - 2.5, wy * scaleY - 2.5, 5, 5)
+    })
+
+    // Jogador (ponto branco pulsante)
+    const px = playerObj.position.x - backgroundObj.position.x + 24
+    const py = playerObj.position.y - backgroundObj.position.y + 34
+    const pulse = Math.sin(Date.now() / 160) > 0 ? 3.5 : 2.5
+    ctx.fillStyle = "#ffffff"
+    ctx.beginPath()
+    ctx.arc(px * scaleX, py * scaleY, pulse, 0, Math.PI * 2)
+    ctx.fill()
   }
 
   function bindTouchControls() {
@@ -1973,6 +2741,10 @@ window.Robolingo = (() => {
     if (actionBtn) {
       const act = (e) => {
         e.preventDefault()
+        if (dialogueState.active) {
+          advanceDialogue()
+          return
+        }
         if (typeof window.triggerInteraction === "function") {
           window.triggerInteraction()
         }
@@ -1999,6 +2771,14 @@ window.Robolingo = (() => {
     init,
     openLoginModal,
     submitLogin,
+    cycleZoom,
+    toggleMinimap,
+    getZoom: () => state.zoom || 1.0,
+    getCustomPlayerSprites,
+    startNpcDialogue,
+    advanceDialogue,
+    speakDialogueLine,
+    isDialogueOpen: () => dialogueState.active,
     openMission,
     openChest,
     openShop,
@@ -2019,13 +2799,7 @@ window.Robolingo = (() => {
     drawNpcDecorations,
     drawChest,
     drawPlayerCosmetics,
-    isModalOpen,
-    getNpcGreetingForTheme: (themeKey) => {
-      const themeInfo = THEMES[themeKey] || THEMES.games
-      return [
-        `Hello, ${state.name}! I am ${themeInfo.npcName} (${themeInfo.label}).`,
-        "Press Space or tap Falar again to start my English challenge!"
-      ]
-    }
+    drawMinimap,
+    isModalOpen
   }
 })()

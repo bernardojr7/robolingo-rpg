@@ -1,9 +1,6 @@
 const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
 
-canvas.width = 1024
-canvas.height = 576
-
 const collisionsMap = []
 for (let i = 0; i < collisions.length; i += 70) {
   collisionsMap.push(collisions.slice(i, 70 + i))
@@ -156,22 +153,24 @@ playerLeftImage.src = './img/playerLeft.png'
 const playerRightImage = new Image()
 playerRightImage.src = './img/playerRight.png'
 
+const basePlayerSprites = {
+  up: playerUpImage,
+  left: playerLeftImage,
+  right: playerRightImage,
+  down: playerDownImage
+}
+
 const player = new Sprite({
   position: {
-    x: canvas.width / 2 - 192 / 4 / 2,
-    y: canvas.height / 2 - 68 / 2
+    x: 1024 / 2 - 48 / 2,
+    y: 576 / 2 - 68 / 2
   },
   image: playerDownImage,
   frames: {
     max: 4,
     hold: 10
   },
-  sprites: {
-    up: playerUpImage,
-    left: playerLeftImage,
-    right: playerRightImage,
-    down: playerDownImage
-  }
+  sprites: basePlayerSprites
 })
 
 const background = new Sprite({
@@ -206,20 +205,34 @@ const movables = [
   ...chests
 ]
 
-const renderables = [
-  background,
-  ...boundaries,
-  ...battleZones,
-  ...characters,
-  player,
-  foreground
-]
-
 const battle = {
   initiated: false
 }
 
-window.lastKey = ''
+window.lastKey = 's'
+
+// Mantém o mapa em tela cheia e o personagem centralizado em qualquer resolução ou zoom
+window.syncViewportCamera = function () {
+  canvas.width = window.innerWidth
+  canvas.height = window.innerHeight
+
+  const zoom = window.Robolingo ? window.Robolingo.getZoom() : 1.0
+  const targetX = canvas.width / zoom / 2 - 24
+  const targetY = canvas.height / zoom / 2 - 34
+
+  const dx = targetX - player.position.x
+  const dy = targetY - player.position.y
+
+  player.position.x += dx
+  player.position.y += dy
+
+  movables.forEach((m) => {
+    m.position.x += dx
+    m.position.y += dy
+  })
+}
+
+window.addEventListener('resize', window.syncViewportCamera)
 
 function getNearbyEntity() {
   const px = player.position.x + (player.width || 48) / 2
@@ -228,7 +241,7 @@ function getNearbyEntity() {
   for (const char of characters) {
     const cx = char.position.x + (char.width || 48) / 2
     const cy = char.position.y + (char.height || 68) / 2
-    if (Math.hypot(px - cx, py - cy) < 76) {
+    if (Math.hypot(px - cx, py - cy) < 78) {
       return { type: 'npc', entity: char }
     }
   }
@@ -236,7 +249,7 @@ function getNearbyEntity() {
   for (const chest of chests) {
     const cx = chest.position.x + 24
     const cy = chest.position.y + 24
-    if (Math.hypot(px - cx, py - cy) < 74) {
+    if (Math.hypot(px - cx, py - cy) < 76) {
       return { type: 'chest', entity: chest }
     }
   }
@@ -248,11 +261,13 @@ function drawInteractionHint(nearby) {
   if (!nearby) return
   c.save()
   const text =
-    nearby.type === 'chest' ? '🎁 Toque em Falar: Abrir Baú' : '💬 Toque em Falar: Conversar'
+    nearby.type === 'chest'
+      ? '🎁 Toque em Falar: Abrir Baú'
+      : '💬 Toque em Falar: Conversar'
   c.font = 'bold 9px "Press Start 2P", monospace'
   const w = c.measureText(text).width + 18
   const x = canvas.width / 2 - w / 2
-  const y = 78
+  const y = 64
 
   c.fillStyle = 'rgba(15, 23, 42, 0.9)'
   c.fillRect(x, y, w, 24)
@@ -267,6 +282,31 @@ function drawInteractionHint(nearby) {
 
 function animate() {
   window.requestAnimationFrame(animate)
+
+  // Atualiza sprites personalizados do aluno
+  if (window.Robolingo) {
+    const customSprites = window.Robolingo.getCustomPlayerSprites(basePlayerSprites)
+    if (customSprites) {
+      player.sprites = customSprites
+      const dirKey =
+        window.lastKey === 'w'
+          ? 'up'
+          : window.lastKey === 'a'
+          ? 'left'
+          : window.lastKey === 'd'
+          ? 'right'
+          : 'down'
+      player.image = customSprites[dirKey] || customSprites.down
+    }
+  }
+
+  const zoom = window.Robolingo ? window.Robolingo.getZoom() : 1.0
+
+  c.save()
+  c.fillStyle = '#090d16'
+  c.fillRect(0, 0, canvas.width, canvas.height)
+  c.scale(zoom, zoom)
+  c.imageSmoothingEnabled = false
 
   background.draw()
   boundaries.forEach((b) => b.draw())
@@ -290,9 +330,23 @@ function animate() {
   }
 
   foreground.draw()
+  c.restore()
 
   const nearby = getNearbyEntity()
-  drawInteractionHint(nearby)
+  if (!window.Robolingo || !window.Robolingo.isDialogueOpen()) {
+    drawInteractionHint(nearby)
+  }
+
+  if (window.Robolingo) {
+    window.Robolingo.drawMinimap(
+      player,
+      background,
+      characters,
+      chests,
+      collisionsMap,
+      battleZonesMap
+    )
+  }
 
   let moving = true
   player.animate = false
@@ -489,26 +543,12 @@ function animate() {
 }
 
 window.triggerInteraction = function () {
-  if (window.Robolingo && window.Robolingo.isModalOpen()) return
-
-  if (player.isInteracting && player.interactionAsset) {
-    player.interactionAsset.dialogueIndex++
-    const { dialogueIndex, dialogue } = player.interactionAsset
-    if (dialogueIndex <= dialogue.length - 1) {
-      document.querySelector('#characterDialogueBox').innerHTML =
-        player.interactionAsset.dialogue[dialogueIndex]
-      return
-    }
-
-    const mentorTheme = player.interactionAsset.themeKey || null
-    player.isInteracting = false
-    player.interactionAsset.dialogueIndex = 0
-    document.querySelector('#characterDialogueBox').style.display = 'none'
-    if (window.Robolingo) {
-      window.Robolingo.openMission('npc', mentorTheme)
-    }
+  if (window.Robolingo && window.Robolingo.isDialogueOpen()) {
+    window.Robolingo.advanceDialogue()
     return
   }
+
+  if (window.Robolingo && window.Robolingo.isModalOpen()) return
 
   const nearby = getNearbyEntity()
 
@@ -529,26 +569,21 @@ window.triggerInteraction = function () {
     return
   }
 
-  player.interactionAsset = targetNpc
   if (window.Robolingo) {
-    targetNpc.dialogue = window.Robolingo.getNpcGreetingForTheme(targetNpc.themeKey)
+    window.Robolingo.startNpcDialogue(targetNpc)
   }
-
-  const firstMessage = targetNpc.dialogue[0]
-  document.querySelector('#characterDialogueBox').innerHTML = firstMessage
-  document.querySelector('#characterDialogueBox').style.display = 'flex'
-  player.isInteracting = true
 }
 
 window.addEventListener('keydown', (e) => {
-  if (window.Robolingo && window.Robolingo.isModalOpen()) return
-
-  if (player.isInteracting) {
-    if (e.key === ' ') {
-      window.triggerInteraction()
+  if (window.Robolingo && window.Robolingo.isDialogueOpen()) {
+    if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault()
+      window.Robolingo.advanceDialogue()
     }
     return
   }
+
+  if (window.Robolingo && window.Robolingo.isModalOpen()) return
 
   switch (e.key.toLowerCase()) {
     case ' ':
@@ -611,3 +646,4 @@ addEventListener('click', () => {
 if (window.Robolingo) {
   window.Robolingo.init()
 }
+window.syncViewportCamera()
