@@ -14,11 +14,6 @@ for (let i = 0; i < battleZonesData.length; i += 70) {
   battleZonesMap.push(battleZonesData.slice(i, 70 + i))
 }
 
-const charactersMap = []
-for (let i = 0; i < charactersMapData.length; i += 70) {
-  charactersMap.push(charactersMapData.slice(i, 70 + i))
-}
-
 const boundaries = []
 const offset = {
   x: -735,
@@ -54,70 +49,93 @@ battleZonesMap.forEach((row, i) => {
   })
 })
 
-const characters = []
 const villagerImg = new Image()
 villagerImg.src = './img/villager/Idle.png'
 
 const oldManImg = new Image()
 oldManImg.src = './img/oldMan/Idle.png'
 
-charactersMap.forEach((row, i) => {
-  row.forEach((symbol, j) => {
-    // 1026 === Mentor da Vila
-    if (symbol === 1026) {
-      characters.push(
-        new Character({
-          position: {
-            x: j * Boundary.width + offset.x,
-            y: i * Boundary.height + offset.y
-          },
-          image: villagerImg,
-          frames: {
-            max: 4,
-            hold: 60
-          },
-          scale: 3,
-          animate: true,
-          dialogue: [
-            'Welcome to Robolingo Village!',
-            'Press Space or tap Falar again to start your English Mission!'
-          ]
-        })
-      )
-    }
-    // 1031 === Sábio do Vocabulário
-    else if (symbol === 1031) {
-      characters.push(
-        new Character({
-          position: {
-            x: j * Boundary.width + offset.x,
-            y: i * Boundary.height + offset.y
-          },
-          image: oldManImg,
-          frames: {
-            max: 4,
-            hold: 60
-          },
-          scale: 3,
-          dialogue: [
-            'Practice English every day to earn EduCoins!',
-            'Ready for a challenge? Let us begin!'
-          ]
-        })
-      )
-    }
+const occupiedTiles = new Set(['25,18', '25,19', '26,18', '26,19'])
 
-    if (symbol !== 0) {
-      boundaries.push(
-        new Boundary({
-          position: {
-            x: j * Boundary.width + offset.x,
-            y: i * Boundary.height + offset.y
-          }
-        })
-      )
+function isTileWalkable(col, row) {
+  if (row < 1 || row >= collisionsMap.length - 1 || col < 1 || col >= 69) {
+    return false
+  }
+  if (collisionsMap[row][col] === 1025) return false
+  if (battleZonesMap[row] && battleZonesMap[row][col] === 1025) return false
+  if (occupiedTiles.has(`${col},${row}`)) return false
+  return true
+}
+
+function findWalkableTile(targetCol, targetRow) {
+  for (let radius = 0; radius <= 8; radius++) {
+    for (let dy = -radius; dy <= radius; dy++) {
+      for (let dx = -radius; dx <= radius; dx++) {
+        const cCol = targetCol + dx
+        const cRow = targetRow + dy
+        if (isTileWalkable(cCol, cRow)) {
+          occupiedTiles.add(`${cCol},${cRow}`)
+          return { col: cCol, row: cRow }
+        }
+      }
     }
+  }
+  return { col: targetCol, row: targetRow }
+}
+
+// Posiciona os 7 Mentores temáticos na vila
+const characters = []
+const mentorSpots = window.Robolingo ? window.Robolingo.MENTOR_SPOTS : []
+
+mentorSpots.forEach((spot) => {
+  const tile = findWalkableTile(spot.col, spot.row)
+  const themeMeta =
+    window.Robolingo && window.Robolingo.THEMES[spot.theme]
+      ? window.Robolingo.THEMES[spot.theme]
+      : { spriteType: 'villager' }
+
+  const worldX = tile.col * Boundary.width + offset.x
+  const worldY = tile.row * Boundary.height + offset.y
+
+  const npc = new Character({
+    position: { x: worldX, y: worldY },
+    image: themeMeta.spriteType === 'oldMan' ? oldManImg : villagerImg,
+    frames: { max: 4, hold: 60 },
+    scale: 3,
+    animate: true,
+    dialogue: ['Hello! Ready to practice English?']
   })
+  npc.themeKey = spot.theme
+  characters.push(npc)
+
+  boundaries.push(
+    new Boundary({
+      position: { x: worldX, y: worldY }
+    })
+  )
+})
+
+// Posiciona os 5 Baús de Vocabulário na vila
+const chests = []
+const chestSpots = window.Robolingo ? window.Robolingo.CHEST_SPOTS : []
+
+chestSpots.forEach((spot) => {
+  const tile = findWalkableTile(spot.col, spot.row)
+  const worldX = tile.col * Boundary.width + offset.x
+  const worldY = tile.row * Boundary.height + offset.y
+
+  chests.push({
+    ...spot,
+    position: { x: worldX, y: worldY },
+    width: Boundary.width,
+    height: Boundary.height
+  })
+
+  boundaries.push(
+    new Boundary({
+      position: { x: worldX, y: worldY }
+    })
+  )
 })
 
 const image = new Image()
@@ -184,7 +202,8 @@ const movables = [
   ...boundaries,
   foreground,
   ...battleZones,
-  ...characters
+  ...characters,
+  ...chests
 ]
 
 const renderables = [
@@ -202,35 +221,78 @@ const battle = {
 
 window.lastKey = ''
 
-function drawNpcMarkers() {
-  characters.forEach((char) => {
-    c.save()
-    c.fillStyle = '#facc15'
-    c.strokeStyle = '#0f172a'
-    c.lineWidth = 3
-    c.beginPath()
-    c.arc(char.position.x + 24, char.position.y - 14, 11, 0, Math.PI * 2)
-    c.fill()
-    c.stroke()
-    c.fillStyle = '#0f172a'
-    c.font = 'bold 11px "Press Start 2P", monospace'
-    c.fillText('!', char.position.x + 19, char.position.y - 9)
-    c.restore()
-  })
+function getNearbyEntity() {
+  const px = player.position.x + (player.width || 48) / 2
+  const py = player.position.y + (player.height || 68) / 2
+
+  for (const char of characters) {
+    const cx = char.position.x + (char.width || 48) / 2
+    const cy = char.position.y + (char.height || 68) / 2
+    if (Math.hypot(px - cx, py - cy) < 76) {
+      return { type: 'npc', entity: char }
+    }
+  }
+
+  for (const chest of chests) {
+    const cx = chest.position.x + 24
+    const cy = chest.position.y + 24
+    if (Math.hypot(px - cx, py - cy) < 74) {
+      return { type: 'chest', entity: chest }
+    }
+  }
+
+  return null
+}
+
+function drawInteractionHint(nearby) {
+  if (!nearby) return
+  c.save()
+  const text =
+    nearby.type === 'chest' ? '🎁 Toque em Falar: Abrir Baú' : '💬 Toque em Falar: Conversar'
+  c.font = 'bold 9px "Press Start 2P", monospace'
+  const w = c.measureText(text).width + 18
+  const x = canvas.width / 2 - w / 2
+  const y = 78
+
+  c.fillStyle = 'rgba(15, 23, 42, 0.9)'
+  c.fillRect(x, y, w, 24)
+  c.strokeStyle = nearby.type === 'chest' ? '#facc15' : '#38bdf8'
+  c.lineWidth = 2
+  c.strokeRect(x, y, w, 24)
+
+  c.fillStyle = '#f8fafc'
+  c.fillText(text, x + 9, y + 15)
+  c.restore()
 }
 
 function animate() {
   window.requestAnimationFrame(animate)
 
-  renderables.forEach((renderable) => {
-    renderable.draw()
+  background.draw()
+  boundaries.forEach((b) => b.draw())
+  battleZones.forEach((bz) => bz.draw())
+
+  if (window.Robolingo) {
+    chests.forEach((chest) => window.Robolingo.drawChest(c, chest))
+  }
+
+  characters.forEach((char) => {
+    char.draw()
+    if (window.Robolingo) {
+      window.Robolingo.drawNpcDecorations(c, char)
+    }
   })
 
-  drawNpcMarkers()
+  player.draw()
 
   if (window.Robolingo) {
     window.Robolingo.drawPlayerCosmetics(c, player)
   }
+
+  foreground.draw()
+
+  const nearby = getNearbyEntity()
+  drawInteractionHint(nearby)
 
   let moving = true
   player.animate = false
@@ -239,7 +301,7 @@ function animate() {
     return
   }
 
-  // Encontro surpresa de inglês ao andar na grama alta
+  // Encontro surpresa na grama alta
   if (keys.w.pressed || keys.a.pressed || keys.s.pressed || keys.d.pressed) {
     for (let i = 0; i < battleZones.length; i++) {
       const battleZone = battleZones[i]
@@ -429,7 +491,7 @@ function animate() {
 window.triggerInteraction = function () {
   if (window.Robolingo && window.Robolingo.isModalOpen()) return
 
-  if (player.isInteracting) {
+  if (player.isInteracting && player.interactionAsset) {
     player.interactionAsset.dialogueIndex++
     const { dialogueIndex, dialogue } = player.interactionAsset
     if (dialogueIndex <= dialogue.length - 1) {
@@ -438,29 +500,41 @@ window.triggerInteraction = function () {
       return
     }
 
-    // Fim do diálogo: abre automaticamente a missão de inglês do Mentor
+    const mentorTheme = player.interactionAsset.themeKey || null
     player.isInteracting = false
     player.interactionAsset.dialogueIndex = 0
     document.querySelector('#characterDialogueBox').style.display = 'none'
     if (window.Robolingo) {
-      window.Robolingo.openMission('npc')
+      window.Robolingo.openMission('npc', mentorTheme)
     }
     return
   }
 
-  if (!player.interactionAsset) {
-    // Se não estiver encostado em um NPC, abre a missão rápida
+  const nearby = getNearbyEntity()
+
+  if (nearby && nearby.type === 'chest') {
+    if (window.Robolingo) {
+      window.Robolingo.openChest(nearby.entity)
+    }
+    return
+  }
+
+  const targetNpc =
+    player.interactionAsset || (nearby && nearby.type === 'npc' ? nearby.entity : null)
+
+  if (!targetNpc) {
     if (window.Robolingo) {
       window.Robolingo.openMission('hud')
     }
     return
   }
 
+  player.interactionAsset = targetNpc
   if (window.Robolingo) {
-    player.interactionAsset.dialogue = window.Robolingo.getNpcGreeting()
+    targetNpc.dialogue = window.Robolingo.getNpcGreetingForTheme(targetNpc.themeKey)
   }
 
-  const firstMessage = player.interactionAsset.dialogue[0]
+  const firstMessage = targetNpc.dialogue[0]
   document.querySelector('#characterDialogueBox').innerHTML = firstMessage
   document.querySelector('#characterDialogueBox').style.display = 'flex'
   player.isInteracting = true
