@@ -1,4 +1,8 @@
 window.Robolingo = (() => {
+  // Senha de acesso ao Painel do Professor (altere aqui se desejar)
+  const TEACHER_PIN = "2026"
+  const SALT = "ROBOLINGO_EDU_2026"
+
   const THEMES = {
     games: {
       label: "🎮 Games & Tech",
@@ -816,7 +820,8 @@ window.Robolingo = (() => {
     { name: "Mariana R.", theme: "🎬 Filmes & Séries", xp: 90 }
   ]
 
-  const STORAGE_KEY = "robolingo_rpg_save_v3"
+  const STORAGE_KEY = "robolingo_rpg_save_v4"
+  const TEACHER_STORAGE_KEY = "robolingo_teacher_records_v1"
 
   let state = {
     registered: false,
@@ -830,8 +835,12 @@ window.Robolingo = (() => {
     equipped: "cap",
     equippedPet: null,
     openedChests: [],
-    solvedCount: 0
+    solvedCount: 0,
+    totalAttempts: 0
   }
+
+  let teacherRecords = []
+  let teacherUnlocked = false
 
   let currentQuestion = null
   let activeMissionTheme = "games"
@@ -847,9 +856,17 @@ window.Robolingo = (() => {
     try {
       const raw =
         localStorage.getItem(STORAGE_KEY) ||
+        localStorage.getItem("robolingo_rpg_save_v3") ||
         localStorage.getItem("robolingo_rpg_save_v2")
       if (raw) {
         state = { ...state, ...JSON.parse(raw) }
+        if (!state.totalAttempts || state.totalAttempts < state.solvedCount) {
+          state.totalAttempts = state.solvedCount
+        }
+      }
+      const savedTeacher = localStorage.getItem(TEACHER_STORAGE_KEY)
+      if (savedTeacher) {
+        teacherRecords = JSON.parse(savedTeacher)
       }
     } catch (e) {
       console.warn("Erro ao carregar progresso local:", e)
@@ -863,6 +880,60 @@ window.Robolingo = (() => {
       console.warn("Erro ao salvar progresso local:", e)
     }
     updateHUD()
+  }
+
+  function saveTeacherRecords() {
+    try {
+      localStorage.setItem(TEACHER_STORAGE_KEY, JSON.stringify(teacherRecords))
+    } catch (_) {}
+  }
+
+  function computeChecksum(payload) {
+    const str = `${payload}::${SALT}`
+    let hash = 2166136261
+    for (let i = 0; i < str.length; i++) {
+      hash ^= str.charCodeAt(i)
+      hash = Math.imul(hash, 16777619)
+    }
+    return (hash >>> 0).toString(36).toUpperCase().padStart(4, "0").slice(0, 4)
+  }
+
+  function getAccuracyPercent() {
+    if (!state.totalAttempts || state.totalAttempts === 0) return 100
+    return Math.round((state.solvedCount / state.totalAttempts) * 100)
+  }
+
+  function generateStudentCode() {
+    const acc = getAccuracyPercent()
+    const raw = `${state.name}|${state.theme}|${state.level}|${state.xp}|${state.solvedCount}|${acc}|${state.openedChests.length}`
+    const b64 = btoa(unescape(encodeURIComponent(raw)))
+    const sig = computeChecksum(raw)
+    return `RB-${b64}-${sig}`
+  }
+
+  function parseStudentCode(codeStr) {
+    const match = codeStr.match(/^RB-([A-Za-z0-9+/=]+)-([A-Z0-9]{4})$/)
+    if (!match) return null
+    try {
+      const b64 = match[1]
+      const sig = match[2]
+      const raw = decodeURIComponent(escape(atob(b64)))
+      const valid = computeChecksum(raw) === sig
+      const parts = raw.split("|")
+      if (parts.length < 7) return null
+      return {
+        name: parts[0],
+        theme: parts[1],
+        level: Number(parts[2]) || 1,
+        xp: Number(parts[3]) || 0,
+        solved: Number(parts[4]) || 0,
+        accuracy: Number(parts[5]) || 0,
+        chests: Number(parts[6]) || 0,
+        valid
+      }
+    } catch (_) {
+      return null
+    }
   }
 
   function shuffleArray(arr) {
@@ -959,16 +1030,29 @@ window.Robolingo = (() => {
   }
 
   function isModalOpen() {
-    return ["loginModal", "missionModal", "shopModal", "rankModal", "chestModal"].some(
-      (id) => {
-        const el = document.getElementById(id)
-        return el && el.style.display === "flex"
-      }
-    )
+    return [
+      "loginModal",
+      "missionModal",
+      "shopModal",
+      "rankModal",
+      "chestModal",
+      "reportModal",
+      "teacherModal"
+    ].some((id) => {
+      const el = document.getElementById(id)
+      return el && el.style.display === "flex"
+    })
   }
 
   function closeAllModals() {
-    ;["missionModal", "shopModal", "rankModal", "chestModal"].forEach((id) => {
+    ;[
+      "missionModal",
+      "shopModal",
+      "rankModal",
+      "chestModal",
+      "reportModal",
+      "teacherModal"
+    ].forEach((id) => {
       const el = document.getElementById(id)
       if (el) el.style.display = "none"
     })
@@ -1211,6 +1295,8 @@ window.Robolingo = (() => {
 
   function finalizeMissionResult(isCorrect, source, extraCorrectInfo = "") {
     questionAnswered = true
+    state.totalAttempts += 1
+
     const feedback = document.getElementById("missionFeedback")
     const enText = document.getElementById("missionEnText")
     const revealBtn = document.getElementById("btnRevealText")
@@ -1426,6 +1512,256 @@ window.Robolingo = (() => {
     document.getElementById("rankModal").style.display = "flex"
   }
 
+  function getFormattedReceiptText() {
+    const themeInfo = THEMES[state.theme] || THEMES.games
+    const acc = getAccuracyPercent()
+    const code = generateStudentCode()
+    return [
+      "🤖 COMPROVANTE ROBOLINGO RPG",
+      `👤 Aluno: ${state.name}`,
+      `🎯 Tema: ${themeInfo.label} (Nível ${state.level})`,
+      `⭐ XP Total: ${state.xp} XP`,
+      `✅ Missões Concluídas: ${state.solvedCount} (${acc}% de acertos)`,
+      `🎁 Baús Descobertos: ${state.openedChests.length}/${CHEST_SPOTS.length}`,
+      `🔐 Código: ${code}`
+    ].join("\n")
+  }
+
+  function openReportModal() {
+    closeAllModals()
+    if (typeof battle !== "undefined") battle.initiated = true
+
+    const themeInfo = THEMES[state.theme] || THEMES.games
+    const acc = getAccuracyPercent()
+
+    document.getElementById("reportStudentSummary").innerHTML = `
+      <div style="font-size:11px; color:#facc15; margin-bottom:8px;">👤 ${state.name}</div>
+      <div style="font-size:9px; color:#e2e8f0; line-height:1.7;">
+        • Tema: <span style="color:#38bdf8;">${themeInfo.label}</span> (Nível ${state.level})<br/>
+        • Pontuação: <span style="color:#c084fc;">${state.xp} XP</span> | 🪙 ${state.coins} EduCoins<br/>
+        • Missões Certas: <span style="color:#4ade80;">${state.solvedCount}</span> (${acc}% de aproveitamento)<br/>
+        • Baús Encontrados: <span style="color:#34d399;">${state.openedChests.length}/${CHEST_SPOTS.length}</span>
+      </div>
+    `
+    document.getElementById("reportPreviewText").value = getFormattedReceiptText()
+    const copyBtn = document.getElementById("btnCopyReceipt")
+    copyBtn.textContent = "📋 Copiar Comprovante para Enviar"
+    copyBtn.style.background = "#16a34a"
+
+    document.getElementById("reportModal").style.display = "flex"
+  }
+
+  function copyReceipt() {
+    const text = document.getElementById("reportPreviewText").value
+    const copyBtn = document.getElementById("btnCopyReceipt")
+
+    const onCopied = () => {
+      playTone("win")
+      copyBtn.textContent = "✅ Copiado! Cole no WhatsApp/Classroom"
+      copyBtn.style.background = "#0284c7"
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard
+        .writeText(text)
+        .then(onCopied)
+        .catch(() => {
+          const area = document.getElementById("reportPreviewText")
+          area.select()
+          document.execCommand("copy")
+          onCopied()
+        })
+    } else {
+      const area = document.getElementById("reportPreviewText")
+      area.select()
+      document.execCommand("copy")
+      onCopied()
+    }
+  }
+
+  function openTeacherModal() {
+    closeAllModals()
+    if (typeof battle !== "undefined") battle.initiated = true
+
+    const lockBox = document.getElementById("teacherLockBox")
+    const panelBox = document.getElementById("teacherDashboardBox")
+
+    if (teacherUnlocked) {
+      lockBox.style.display = "none"
+      panelBox.style.display = "block"
+      renderTeacherTable()
+    } else {
+      lockBox.style.display = "block"
+      panelBox.style.display = "none"
+      document.getElementById("inputTeacherPin").value = ""
+      document.getElementById("teacherPinError").style.display = "none"
+    }
+
+    document.getElementById("teacherModal").style.display = "flex"
+  }
+
+  function unlockTeacherPanel() {
+    const pin = document.getElementById("inputTeacherPin").value.trim()
+    if (pin === TEACHER_PIN) {
+      teacherUnlocked = true
+      playTone("win")
+      document.getElementById("teacherLockBox").style.display = "none"
+      document.getElementById("teacherDashboardBox").style.display = "block"
+      renderTeacherTable()
+    } else {
+      playTone("wrong")
+      document.getElementById("teacherPinError").style.display = "block"
+    }
+  }
+
+  function processTeacherCodes() {
+    const rawInput = document.getElementById("teacherPasteArea").value
+    const statusEl = document.getElementById("teacherImportStatus")
+    const matches = rawInput.match(/RB-[A-Za-z0-9+/=]+-[A-Z0-9]{4}/g)
+
+    if (!matches || matches.length === 0) {
+      playTone("wrong")
+      statusEl.style.display = "block"
+      statusEl.style.color = "#fca5a5"
+      statusEl.textContent = "⚠️ Nenhum código 'RB-...' encontrado no texto colado."
+      return
+    }
+
+    let validCount = 0
+    let invalidCount = 0
+
+    matches.forEach((token) => {
+      const parsed = parseStudentCode(token)
+      if (!parsed || !parsed.valid) {
+        invalidCount += 1
+        return
+      }
+      validCount += 1
+      const existingIdx = teacherRecords.findIndex(
+        (r) => r.name.toLowerCase() === parsed.name.toLowerCase()
+      )
+      if (existingIdx >= 0) {
+        if (parsed.xp >= teacherRecords[existingIdx].xp) {
+          teacherRecords[existingIdx] = parsed
+        }
+      } else {
+        teacherRecords.push(parsed)
+      }
+    })
+
+    teacherRecords.sort((a, b) => b.xp - a.xp)
+    saveTeacherRecords()
+    renderTeacherTable()
+
+    document.getElementById("teacherPasteArea").value = ""
+    statusEl.style.display = "block"
+    if (invalidCount > 0) {
+      playTone("wrong")
+      statusEl.style.color = "#fcd34d"
+      statusEl.textContent = `✅ ${validCount} importado(s) | 🚨 ${invalidCount} código(s) inválido(s) ou adulterado(s) ignorado(s).`
+    } else {
+      playTone("win")
+      statusEl.style.color = "#4ade80"
+      statusEl.textContent = `✅ ${validCount} comprovante(s) validado(s) com sucesso!`
+    }
+  }
+
+  function renderTeacherTable() {
+    const statsEl = document.getElementById("teacherClassStats")
+    const listEl = document.getElementById("teacherStudentList")
+
+    if (teacherRecords.length === 0) {
+      statsEl.innerHTML = "Nenhum aluno importado ainda."
+      listEl.innerHTML =
+        '<div style="font-size:8px; color:#94a3b8; padding:10px; text-align:center;">Cole acima os comprovantes enviados pelos alunos para gerar o boletim da turma.</div>'
+      return
+    }
+
+    const totalStudents = teacherRecords.length
+    const avgXp = Math.round(
+      teacherRecords.reduce((acc, r) => acc + r.xp, 0) / totalStudents
+    )
+    const avgAcc = Math.round(
+      teacherRecords.reduce((acc, r) => acc + r.accuracy, 0) / totalStudents
+    )
+
+    statsEl.innerHTML = `👥 ${totalStudents} aluno(s) • ⭐ Média: ${avgXp} XP • 🎯 Acertos: ${avgAcc}%`
+    listEl.innerHTML = ""
+
+    teacherRecords.forEach((rec, idx) => {
+      const themeInfo = THEMES[rec.theme] || { label: rec.theme }
+      const medal = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `#${idx + 1}`
+      const row = document.createElement("div")
+      row.className = "robo-rank-row"
+      row.innerHTML = `
+        <div>
+          <div style="font-size:10px; color:#facc15;">${medal} ${rec.name} <span style="color:#94a3b8; font-size:8px;">(Nv.${rec.level})</span></div>
+          <div style="font-size:8px; color:#cbd5e1; margin-top:4px;">
+            ${themeInfo.label} • ✅ ${rec.solved} (${rec.accuracy}%) • 🎁 ${rec.chests}/5
+          </div>
+        </div>
+        <div style="font-size:10px; color:#38bdf8; white-space:nowrap;">${rec.xp} XP</div>
+      `
+      listEl.appendChild(row)
+    })
+  }
+
+  function exportTeacherCSV() {
+    if (teacherRecords.length === 0) {
+      playTone("wrong")
+      alert("Importe pelo menos um comprovante antes de baixar a planilha.")
+      return
+    }
+
+    const header = [
+      "Posicao",
+      "Aluno",
+      "Tema",
+      "Nivel",
+      "XP_Total",
+      "Missoes_Certas",
+      "Aproveitamento_%",
+      "Baus_Coletados"
+    ].join(";")
+
+    const rows = teacherRecords.map((r, idx) => {
+      const themeLabel = (THEMES[r.theme] ? THEMES[r.theme].label : r.theme).replace(
+        /[^\w\sÀ-ÿ&]/g,
+        ""
+      ).trim()
+      return [
+        idx + 1,
+        `"${r.name.replace(/"/g, '""')}"`,
+        `"${themeLabel}"`,
+        r.level,
+        r.xp,
+        r.solved,
+        `${r.accuracy}%`,
+        `${r.chests}/5`
+      ].join(";")
+    })
+
+    const csvContent = "\uFEFF" + [header, ...rows].join("\n")
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `relatorio_robolingo_${new Date().toISOString().slice(0, 10)}.csv`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+    playTone("win")
+  }
+
+  function clearTeacherRecords() {
+    if (!confirm("Deseja limpar a lista atual de alunos importados?")) return
+    teacherRecords = []
+    saveTeacherRecords()
+    renderTeacherTable()
+    playTone("click")
+  }
+
   function drawNpcDecorations(ctx, char) {
     const themeInfo = THEMES[char.themeKey] || THEMES.games
     const x = char.position.x
@@ -1434,13 +1770,11 @@ window.Robolingo = (() => {
 
     ctx.save()
 
-    // Chapéu / detalhe temático do Mentor
     ctx.fillStyle = themeInfo.hatColor
     ctx.fillRect(x + 12, y + 2, 24, 7)
     ctx.fillStyle = themeInfo.accentColor
     ctx.fillRect(x + 15, y + 7, 18, 3)
 
-    // Placa com nome e matéria acima do Mentor
     ctx.font = 'bold 8px "Press Start 2P", monospace'
     const tag = themeInfo.shortTag
     const textW = ctx.measureText(tag).width
@@ -1462,23 +1796,19 @@ window.Robolingo = (() => {
     const y = chest.position.y + 12
 
     ctx.save()
-    // Sombra
     ctx.fillStyle = "rgba(0,0,0,0.35)"
     ctx.fillRect(x + 2, y + 22, 28, 6)
 
-    // Corpo do baú
     ctx.fillStyle = opened ? "#78350f" : "#b45309"
     ctx.fillRect(x, y + 8, 32, 16)
     ctx.strokeStyle = "#0f172a"
     ctx.lineWidth = 2
     ctx.strokeRect(x, y + 8, 32, 16)
 
-    // Tampa
     ctx.fillStyle = opened ? "#451a03" : "#d97706"
     ctx.fillRect(x, opened ? y : y + 2, 32, 8)
     ctx.strokeRect(x, opened ? y : y + 2, 32, 8)
 
-    // Fechadura dourada se ainda estiver fechado
     if (!opened) {
       ctx.fillStyle = "#facc15"
       ctx.fillRect(x + 13, y + 8, 6, 7)
@@ -1523,14 +1853,12 @@ window.Robolingo = (() => {
     const py = petPos.y + bounce
 
     ctx.save()
-    // Sombra do pet
     ctx.fillStyle = "rgba(0,0,0,0.35)"
     ctx.beginPath()
     ctx.ellipse(px + 13, petPos.y + 25, 11, 4, 0, 0, Math.PI * 2)
     ctx.fill()
 
     if (state.equippedPet === "pet_dog") {
-      // Robô-Cão Azul e Ciano
       ctx.fillStyle = "#38bdf8"
       ctx.fillRect(px + 4, py + 8, 18, 13)
       ctx.fillStyle = "#1d4ed8"
@@ -1540,7 +1868,6 @@ window.Robolingo = (() => {
       ctx.fillRect(px + 8, py + 12, 3, 3)
       ctx.fillRect(px + 15, py + 12, 3, 3)
     } else if (state.equippedPet === "pet_owl") {
-      // Coruja Pixel Roxa e Dourada
       ctx.fillStyle = "#7e22ce"
       ctx.fillRect(px + 5, py + 5, 16, 17)
       ctx.fillStyle = "#facc15"
@@ -1549,7 +1876,6 @@ window.Robolingo = (() => {
       ctx.fillStyle = "#fb923c"
       ctx.fillRect(px + 12, py + 13, 3, 3)
     } else if (state.equippedPet === "pet_dragon") {
-      // Mini Dragão Esmeralda e Fogo
       ctx.fillStyle = "#16a34a"
       ctx.fillRect(px + 4, py + 6, 18, 16)
       ctx.fillStyle = "#facc15"
@@ -1677,6 +2003,13 @@ window.Robolingo = (() => {
     openChest,
     openShop,
     openRanking,
+    openReportModal,
+    copyReceipt,
+    openTeacherModal,
+    unlockTeacherPanel,
+    processTeacherCodes,
+    exportTeacherCSV,
+    clearTeacherRecords,
     closeAllModals,
     revealListeningText,
     speakCurrent: () => currentQuestion && speakEnglish(currentQuestion.en, 0.92),

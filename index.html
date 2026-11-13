@@ -118,16 +118,19 @@
         transform: translateX(-50%);
         z-index: 30;
         display: flex;
-        gap: 8px;
+        gap: 5px;
+        width: max-content;
+        max-width: 96vw;
       }
 
       .menu-btn {
-        padding: 10px 12px;
+        padding: 9px 8px;
         border-radius: 10px;
         color: #fff;
-        font-size: 10px;
+        font-size: 8.5px;
         border: 2px solid rgba(255, 255, 255, 0.2);
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        white-space: nowrap;
       }
 
       /* Controles Táteis (D-Pad + Botão Falar) */
@@ -197,14 +200,14 @@
         border: 3px solid #38bdf8;
         border-radius: 14px;
         width: 100%;
-        max-width: 490px;
+        max-width: 500px;
         max-height: 90vh;
         overflow-y: auto;
         padding: 18px;
         box-shadow: 0 12px 32px rgba(0, 0, 0, 0.75);
       }
 
-      .robo-input, .robo-select {
+      .robo-input, .robo-select, .robo-textarea {
         width: 100%;
         padding: 10px;
         margin-top: 6px;
@@ -214,6 +217,13 @@
         border: 2px solid #475569;
         border-radius: 8px;
         font-size: 10px;
+      }
+
+      .robo-textarea {
+        font-family: monospace;
+        font-size: 11px;
+        line-height: 1.4;
+        resize: vertical;
       }
 
       .robo-option-btn {
@@ -331,7 +341,6 @@
         <canvas></canvas>
         <div id="characterDialogueBox"></div>
 
-        <!-- Elementos originais mantidos ocultos para compatibilidade -->
         <div id="userInterface" style="display: none">
           <div id="enemyHealthBar"></div>
           <div id="playerHealthBar"></div>
@@ -366,7 +375,10 @@
         🛒 Loja
       </button>
       <button class="menu-btn" style="background:#d97706;" onclick="Robolingo.openRanking()">
-        🏆 Ranking
+        🏆 Rank
+      </button>
+      <button class="menu-btn" style="background:#7c3aed;" onclick="Robolingo.openReportModal()">
+        📋 Entrega
       </button>
     </div>
 
@@ -383,7 +395,7 @@
           id="inputStudentName"
           class="robo-input"
           type="text"
-          maxlength="16"
+          maxlength="20"
           placeholder="Ex: Son"
         />
 
@@ -414,9 +426,25 @@
             color: #fff;
             border-radius: 10px;
             font-size: 11px;
+            margin-bottom: 10px;
           "
         >
           ▶ ENTRAR NA VILA
+        </button>
+
+        <button
+          onclick="Robolingo.openTeacherModal()"
+          style="
+            width: 100%;
+            padding: 9px;
+            background: #1e293b;
+            color: #94a3b8;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            font-size: 8px;
+          "
+        >
+          👩‍🏫 Acesso do Professor
         </button>
       </div>
     </div>
@@ -544,7 +572,7 @@
       </div>
     </div>
 
-    <!-- Modal 3: EduShop (Acessórios + Pets) -->
+    <!-- Modal 3: EduShop -->
     <div id="shopModal" class="robo-modal-overlay">
       <div class="robo-modal-card">
         <div
@@ -668,6 +696,200 @@
           id="chestTip"
           style="font-size: 9px; color: #cbd5e1; line-height: 1.5;"
         ></p>
+      </div>
+    </div>
+
+    <!-- Modal 6: Comprovante de Aula do Aluno -->
+    <div id="reportModal" class="robo-modal-overlay">
+      <div class="robo-modal-card" style="border-color:#a855f7;">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+          "
+        >
+          <h2 style="font-size:12px; color:#c084fc;">📋 COMPROVANTE DE AULA</h2>
+          <button
+            onclick="Robolingo.closeAllModals()"
+            style="background:#334155; color:#fff; padding:6px 10px; border-radius:6px; font-size:9px;"
+          >
+            ✕ Fechar
+          </button>
+        </div>
+
+        <div
+          id="reportStudentSummary"
+          style="
+            background: #1e293b;
+            border: 2px solid #475569;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 12px;
+          "
+        ></div>
+
+        <label style="font-size:8px; color:#94a3b8;">
+          Copie o boletim abaixo e envie para o Professor:
+        </label>
+        <textarea
+          id="reportPreviewText"
+          class="robo-textarea"
+          rows="7"
+          readonly
+        ></textarea>
+
+        <button
+          id="btnCopyReceipt"
+          onclick="Robolingo.copyReceipt()"
+          style="
+            width: 100%;
+            padding: 12px;
+            background: #16a34a;
+            color: #fff;
+            border-radius: 10px;
+            font-size: 10px;
+            margin-bottom: 10px;
+          "
+        >
+          📋 Copiar Comprovante para Enviar
+        </button>
+
+        <button
+          onclick="Robolingo.openTeacherModal()"
+          style="
+            width: 100%;
+            padding: 9px;
+            background: #1e293b;
+            color: #94a3b8;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            font-size: 8px;
+          "
+        >
+          👩‍🏫 Painel do Professor
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal 7: Painel do Professor -->
+    <div id="teacherModal" class="robo-modal-overlay">
+      <div class="robo-modal-card" style="border-color:#facc15; max-width:540px;">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+          "
+        >
+          <h2 style="font-size:12px; color:#facc15;">👩‍🏫 PAINEL DO PROFESSOR</h2>
+          <button
+            onclick="Robolingo.closeAllModals()"
+            style="background:#334155; color:#fff; padding:6px 10px; border-radius:6px; font-size:9px;"
+          >
+            ✕ Fechar
+          </button>
+        </div>
+
+        <!-- Tela de Senha -->
+        <div id="teacherLockBox">
+          <p style="font-size:9px; color:#cbd5e1; line-height:1.5; margin-bottom:10px;">
+            Digite o PIN do professor para corrigir e consolidar os comprovantes da turma:
+          </p>
+          <input
+            id="inputTeacherPin"
+            class="robo-input"
+            type="password"
+            inputmode="numeric"
+            maxlength="10"
+            placeholder="PIN (Padrão: 2026)"
+          />
+          <p
+            id="teacherPinError"
+            style="display:none; font-size:8px; color:#fca5a5; margin-bottom:10px;"
+          >
+            ❌ PIN incorreto. Tente novamente.
+          </p>
+          <button
+            onclick="Robolingo.unlockTeacherPanel()"
+            style="
+              width: 100%;
+              padding: 12px;
+              background: #d97706;
+              color: #fff;
+              border-radius: 8px;
+              font-size: 10px;
+            "
+          >
+            🔓 Desbloquear Painel
+          </button>
+        </div>
+
+        <!-- Dashboard Desbloqueado -->
+        <div id="teacherDashboardBox" style="display:none;">
+          <label style="font-size:8px; color:#94a3b8;">
+            Cole abaixo 1 ou vários comprovantes enviados pelos alunos (pode colar a conversa inteira):
+          </label>
+          <textarea
+            id="teacherPasteArea"
+            class="robo-textarea"
+            rows="4"
+            placeholder="Cole aqui os textos com códigos RB-..."
+          ></textarea>
+
+          <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;">
+            <button
+              onclick="Robolingo.processTeacherCodes()"
+              class="robo-mini-btn"
+              style="background:#16a34a; flex:1;"
+            >
+              🔍 Validar Códigos
+            </button>
+            <button
+              onclick="Robolingo.exportTeacherCSV()"
+              class="robo-mini-btn"
+              style="background:#0284c7;"
+            >
+              📥 Baixar Excel (.CSV)
+            </button>
+            <button
+              onclick="Robolingo.clearTeacherRecords()"
+              class="robo-mini-btn"
+              style="background:#dc2626;"
+            >
+              🗑️ Limpar
+            </button>
+          </div>
+
+          <div
+            id="teacherImportStatus"
+            style="
+              display: none;
+              font-size: 8px;
+              line-height: 1.5;
+              margin-bottom: 10px;
+              padding: 8px;
+              background: #1e293b;
+              border-radius: 6px;
+            "
+          ></div>
+
+          <div
+            id="teacherClassStats"
+            style="
+              font-size: 8px;
+              color: #38bdf8;
+              background: #1e293b;
+              padding: 8px 10px;
+              border-radius: 8px;
+              margin-bottom: 10px;
+            "
+          ></div>
+
+          <div id="teacherStudentList"></div>
+        </div>
       </div>
     </div>
 
