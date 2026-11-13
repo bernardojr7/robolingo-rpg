@@ -1,4 +1,4 @@
-const canvas = document.querySelector('canvas')
+const canvas = document.querySelector('#gameCanvas')
 const c = canvas.getContext('2d')
 
 const collisionsMap = []
