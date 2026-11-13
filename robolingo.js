@@ -1,5 +1,5 @@
 window.Robolingo = (() => {
-  const TEACHER_PIN = "2026"
+  const TEACHER_PIN = "RT26"
   const SALT = "ROBOLINGO_EDU_2026"
 
   const THEMES = {
@@ -907,7 +907,7 @@ window.Robolingo = (() => {
     { name: "Mariana R.", theme: "🎬 Filmes & Séries", xp: 90 }
   ]
 
-  const STORAGE_KEY = "robolingo_rpg_save_v6"
+  const STORAGE_KEY = "robolingo_rpg_save_v7"
   const TEACHER_STORAGE_KEY = "robolingo_teacher_records_v1"
 
   let state = {
@@ -927,6 +927,7 @@ window.Robolingo = (() => {
     avatarHair: "brown",
     avatarOutfit: "blue",
     avatarSkin: "light",
+    avatarPortrait: "player",
     zoom: 1.0,
     showMinimap: true
   }
@@ -960,6 +961,9 @@ window.Robolingo = (() => {
   let customSpriteKey = ""
   let minimapBaseCanvas = null
 
+  // Cache dos retratos de alta resolução em img/portraits/
+  const portraitCache = {}
+
   function hexToRgb(hex) {
     const clean = hex.replace("#", "")
     const num = parseInt(clean, 16)
@@ -980,8 +984,8 @@ window.Robolingo = (() => {
     try {
       const raw =
         localStorage.getItem(STORAGE_KEY) ||
-        localStorage.getItem("robolingo_rpg_save_v5") ||
-        localStorage.getItem("robolingo_rpg_save_v4")
+        localStorage.getItem("robolingo_rpg_save_v6") ||
+        localStorage.getItem("robolingo_rpg_save_v5")
       if (raw) {
         state = { ...state, ...JSON.parse(raw) }
         if (!state.totalAttempts || state.totalAttempts < state.solvedCount) {
@@ -1228,8 +1232,25 @@ window.Robolingo = (() => {
   }
 
   // =========================================================================
-  // RETRATOS PIXEL ART ESTILO JRPG / VISUAL NOVEL (32x32 -> 160x160)
+  // RETRATOS JRPG (CARREGA img/portraits/*.png + FALLBACK PIXEL ART)
   // =========================================================================
+  function drawHighResPortrait(canvasEl, img) {
+    if (!canvasEl || !img) return
+    const ctx = canvasEl.getContext("2d")
+    const cw = canvasEl.width
+    const ch = canvasEl.height
+    ctx.clearRect(0, 0, cw, ch)
+    ctx.imageSmoothingEnabled = true
+    ctx.imageSmoothingQuality = "high"
+
+    const scale = Math.min(cw / img.width, ch / img.height)
+    const dw = img.width * scale
+    const dh = img.height * scale
+    const dx = (cw - dw) / 2
+    const dy = ch - dh
+    ctx.drawImage(img, dx, dy, dw, dh)
+  }
+
   function drawPixelBustPortrait(canvasEl, profile) {
     if (!canvasEl) return
     const ctx = canvasEl.getContext("2d")
@@ -1248,74 +1269,61 @@ window.Robolingo = (() => {
 
     p.clearRect(0, 0, size, size)
 
-    // Capa / fundo de ombros para Mestra Clara ou aura
     if (profile.style === "reading" || profile.hat === "aura") {
       p.fillStyle = profile.hat === "aura" ? "#facc15" : "#4c1d95"
       p.fillRect(5, 19, 22, 13)
     }
 
-    // Tronco / Roupa
     p.fillStyle = outfit
     p.fillRect(7, 21, 18, 11)
     p.fillStyle = "#0f172a"
     p.fillRect(6, 22, 1, 10)
     p.fillRect(25, 22, 1, 10)
 
-    // Detalhes do uniforme por personagem
     if (profile.style === "science") {
-      // Jaleco branco com gravata verde
       p.fillStyle = "#f8fafc"
       p.fillRect(7, 21, 18, 11)
       p.fillStyle = "#059669"
       p.fillRect(15, 22, 2, 8)
     } else if (profile.style === "cooking") {
-      // Dólmã de chef branco com lenço laranja
       p.fillStyle = "#f8fafc"
       p.fillRect(7, 21, 18, 11)
       p.fillStyle = "#fb923c"
       p.fillRect(11, 21, 10, 3)
     } else if (profile.style === "games") {
-      // Jaqueta gamer com faixa neon
       p.fillStyle = "#1e3a8a"
       p.fillRect(7, 21, 18, 11)
       p.fillStyle = "#38bdf8"
       p.fillRect(10, 21, 2, 11)
       p.fillRect(20, 21, 2, 11)
     } else if (profile.style === "manga") {
-      // Túnica vermelha com gola dourada
       p.fillStyle = "#b91c1c"
       p.fillRect(7, 21, 18, 11)
       p.fillStyle = "#facc15"
       p.fillRect(11, 21, 10, 2)
     } else if (profile.style === "movies") {
-      // Blazer escuro com cachecol dourado
       p.fillStyle = "#1e293b"
       p.fillRect(7, 21, 18, 11)
       p.fillStyle = "#facc15"
       p.fillRect(13, 21, 6, 9)
     } else {
-      // Gola estilizada
       p.fillStyle = accent
       p.fillRect(12, 21, 8, 2)
     }
 
-    // Pescoço
     p.fillStyle = skinShadow
     p.fillRect(14, 18, 4, 3)
 
-    // Cabelo atrás (para cabelos longos como Clara, Chloe, Mia)
     if (profile.style === "reading" || profile.style === "fashion" || profile.style === "cooking") {
       p.fillStyle = hair
       p.fillRect(7, 8, 18, 15)
     }
 
-    // Rosto
     p.fillStyle = skin
     p.fillRect(10, 8, 12, 11)
     p.fillStyle = skinShadow
     p.fillRect(10, 17, 12, 2)
 
-    // Olhos expressivos estilo JRPG
     p.fillStyle = "#ffffff"
     p.fillRect(11, 12, 3, 3)
     p.fillRect(18, 12, 3, 3)
@@ -1323,14 +1331,12 @@ window.Robolingo = (() => {
     p.fillRect(12, 12, 2, 3)
     p.fillRect(19, 12, 2, 3)
 
-    // Rubor suave + boca
     p.fillStyle = "#f472b6"
     p.fillRect(10, 15, 2, 1)
     p.fillRect(20, 15, 2, 1)
     p.fillStyle = "#9f1239"
     p.fillRect(15, 16, 2, 1)
 
-    // Cabelo frontal / Franja
     p.fillStyle = hair
     p.fillRect(9, 5, 14, 4)
     p.fillRect(9, 8, 2, 6)
@@ -1338,36 +1344,29 @@ window.Robolingo = (() => {
     p.fillRect(12, 8, 3, 2)
     p.fillRect(17, 8, 2, 2)
 
-    // Acessórios / Chapéus exclusivos
     if (profile.style === "cooking") {
-      // Chapéu de Chef
       p.fillStyle = "#ffffff"
       p.fillRect(10, 1, 12, 5)
       p.fillRect(9, 2, 14, 3)
     } else if (profile.style === "manga") {
-      // Bandana ninja vermelha
       p.fillStyle = "#ef4444"
       p.fillRect(9, 7, 14, 2)
       p.fillStyle = "#cbd5e1"
       p.fillRect(13, 7, 6, 2)
     } else if (profile.style === "science") {
-      // Óculos de laboratório na testa
       p.fillStyle = "#34d399"
       p.fillRect(10, 6, 5, 2)
       p.fillRect(17, 6, 5, 2)
     } else if (profile.style === "movies") {
-      // Boina de diretor
       p.fillStyle = "#d97706"
       p.fillRect(9, 4, 15, 3)
     } else if (profile.style === "reading") {
-      // Capuz mágico roxo
       p.fillStyle = "#6d28d9"
       p.fillRect(8, 4, 16, 3)
       p.fillRect(8, 6, 2, 12)
       p.fillRect(22, 6, 2, 12)
     }
 
-    // Itens equipados pelo aluno (ou headset do Axel / óculos da Chloe)
     if (profile.hat === "cap") {
       p.fillStyle = "#2563eb"
       p.fillRect(9, 4, 14, 3)
@@ -1398,6 +1397,44 @@ window.Robolingo = (() => {
     ctx.drawImage(off, 0, 0, canvasEl.width, canvasEl.height)
   }
 
+  function renderJrpgPortrait(canvasEl, portraitKey, fallbackProfile) {
+    if (!canvasEl) return
+
+    const cached = portraitCache[portraitKey]
+    if (cached && cached.status === "loaded" && cached.img) {
+      drawHighResPortrait(canvasEl, cached.img)
+      return
+    }
+
+    // Desenha o retrato pixel art imediatamente enquanto carrega (ou se não houver arquivo)
+    drawPixelBustPortrait(canvasEl, fallbackProfile)
+
+    if (cached && (cached.status === "loading" || cached.status === "error")) {
+      return
+    }
+
+    const extensions = ["png", "webp", "jpg", "jpeg"]
+    let extIdx = 0
+    const img = new Image()
+    portraitCache[portraitKey] = { status: "loading", img }
+
+    const tryNext = () => {
+      if (extIdx >= extensions.length) {
+        portraitCache[portraitKey] = { status: "error", img: null }
+        return
+      }
+      const ext = extensions[extIdx++]
+      img.src = `./img/portraits/${portraitKey}.${ext}`
+    }
+
+    img.onload = () => {
+      portraitCache[portraitKey] = { status: "loaded", img }
+      drawHighResPortrait(canvasEl, img)
+    }
+    img.onerror = tryNext
+    tryNext()
+  }
+
   function drawMascotIcon(canvasEl, themeKey) {
     if (!canvasEl) return
     const ctx = canvasEl.getContext("2d")
@@ -1407,7 +1444,6 @@ window.Robolingo = (() => {
     off.height = 16
     const p = off.getContext("2d")
 
-    // Mini robô/mascotes estilo pixel art (como o emblema na caixa das imagens 1 e 2)
     p.fillStyle = theme.accentColor
     p.fillRect(3, 4, 10, 9)
     p.fillStyle = "#facc15"
@@ -1421,6 +1457,17 @@ window.Robolingo = (() => {
     ctx.clearRect(0, 0, canvasEl.width, canvasEl.height)
     ctx.imageSmoothingEnabled = false
     ctx.drawImage(off, 0, 0, canvasEl.width, canvasEl.height)
+  }
+
+  function togglePortraitStyle() {
+    state.avatarPortrait = state.avatarPortrait === "player" ? "player_girl" : "player"
+    const btn = document.getElementById("btnTogglePortrait")
+    if (btn) {
+      btn.textContent =
+        state.avatarPortrait === "player_girl" ? "👧 Aventureira" : "🧑 Aventureiro"
+    }
+    playTone("click")
+    updateAvatarPreview()
   }
 
   function renderAvatarSwatches() {
@@ -1438,8 +1485,8 @@ window.Robolingo = (() => {
         const btn = document.createElement("button")
         btn.type = "button"
         btn.title = opt.name
-        btn.style.width = "26px"
-        btn.style.height = "26px"
+        btn.style.width = "24px"
+        btn.style.height = "24px"
         btn.style.borderRadius = "6px"
         btn.style.background = opt.color
         btn.style.border =
@@ -1459,7 +1506,13 @@ window.Robolingo = (() => {
   function updateAvatarPreview() {
     const preview = document.getElementById("avatarPreviewCanvas")
     if (!preview) return
-    drawPixelBustPortrait(preview, {
+    const btn = document.getElementById("btnTogglePortrait")
+    if (btn) {
+      btn.textContent =
+        state.avatarPortrait === "player_girl" ? "👧 Aventureira" : "🧑 Aventureiro"
+    }
+
+    renderJrpgPortrait(preview, state.avatarPortrait || "player", {
       hairColor: getOptionColor("hair", state.avatarHair),
       outfitColor: getOptionColor("outfit", state.avatarOutfit),
       skinColor: getOptionColor("skin", state.avatarSkin),
@@ -1499,7 +1552,6 @@ window.Robolingo = (() => {
     }
   }
 
-  // Recoloração dinâmica dos sprites do aluno no mapa
   function recolorSpriteImage(img, outfitHex, hairHex, skinHex) {
     if (!img || !img.complete || img.width === 0) return img
     try {
@@ -1522,22 +1574,17 @@ window.Robolingo = (() => {
         const g = d[i + 1]
         const b = d[i + 2]
 
-        // Roupa/Boné vermelho original -> Cor escolhida pelo aluno
         if (r > 135 && g < 95 && b < 95) {
           const lum = r / 220
           d[i] = Math.min(255, Math.round(outfitRgb.r * lum))
           d[i + 1] = Math.min(255, Math.round(outfitRgb.g * lum))
           d[i + 2] = Math.min(255, Math.round(outfitRgb.b * lum))
-        }
-        // Cabelo escuro original -> Cor de cabelo escolhida
-        else if (r > 25 && r < 85 && g > 20 && g < 75 && b > 20 && b < 75) {
+        } else if (r > 25 && r < 85 && g > 20 && g < 75 && b > 20 && b < 75) {
           const lum = (r + g + b) / 150
           d[i] = Math.min(255, Math.round(hairRgb.r * Math.max(0.65, lum)))
           d[i + 1] = Math.min(255, Math.round(hairRgb.g * Math.max(0.65, lum)))
           d[i + 2] = Math.min(255, Math.round(hairRgb.b * Math.max(0.65, lum)))
-        }
-        // Tom de pele
-        else if (r > 195 && g > 135 && g < 215 && b > 95 && b < 185 && r > g && g > b) {
+        } else if (r > 195 && g > 135 && g < 215 && b > 95 && b < 185 && r > g && g > b) {
           const lum = r / 245
           d[i] = Math.min(255, Math.round(skinRgb.r * lum))
           d[i + 1] = Math.min(255, Math.round(skinRgb.g * lum))
@@ -1654,16 +1701,20 @@ window.Robolingo = (() => {
     const themeKey = npc && npc.themeKey ? npc.themeKey : state.theme
     const theme = THEMES[themeKey] || THEMES.games
 
-    // Desenha os 2 retratos (Aluno à esquerda, Mentor à direita)
-    drawPixelBustPortrait(document.getElementById("jrpgLeftCanvas"), {
-      hairColor: getOptionColor("hair", state.avatarHair),
-      outfitColor: getOptionColor("outfit", state.avatarOutfit),
-      skinColor: getOptionColor("skin", state.avatarSkin),
-      accentColor: "#facc15",
-      hat: state.equipped
-    })
+    // Carrega os retratos da pasta img/portraits/ (com fallback pixel art automático)
+    renderJrpgPortrait(
+      document.getElementById("jrpgLeftCanvas"),
+      state.avatarPortrait || "player",
+      {
+        hairColor: getOptionColor("hair", state.avatarHair),
+        outfitColor: getOptionColor("outfit", state.avatarOutfit),
+        skinColor: getOptionColor("skin", state.avatarSkin),
+        accentColor: "#facc15",
+        hat: state.equipped
+      }
+    )
 
-    drawPixelBustPortrait(document.getElementById("jrpgRightCanvas"), {
+    renderJrpgPortrait(document.getElementById("jrpgRightCanvas"), themeKey, {
       style: themeKey,
       hairColor: theme.hairColor,
       outfitColor: theme.outfitColor,
@@ -1703,7 +1754,6 @@ window.Robolingo = (() => {
   function advanceDialogue() {
     if (!dialogueState.active) return
 
-    // Se ainda estiver digitando, completa instantaneamente
     if (dialogueState.timer) {
       clearInterval(dialogueState.timer)
       dialogueState.timer = null
@@ -2423,33 +2473,27 @@ window.Robolingo = (() => {
 
     ctx.save()
 
-    // Uniformes & detalhes únicos no corpo de cada Mentor
     if (themeKey === "science") {
-      // Jaleco branco do Dr. Nova
       ctx.fillStyle = "#f8fafc"
       ctx.fillRect(x + 12, y + 34, 24, 22)
       ctx.fillStyle = "#059669"
       ctx.fillRect(x + 22, y + 36, 4, 14)
     } else if (themeKey === "cooking") {
-      // Chapéu alto e avental da Chef Mia
       ctx.fillStyle = "#ffffff"
       ctx.fillRect(x + 14, y - 3, 20, 10)
       ctx.fillStyle = "#fb923c"
       ctx.fillRect(x + 14, y + 36, 20, 18)
     } else if (themeKey === "games") {
-      // Headset neon + jaqueta gamer do Mentor Axel
       ctx.fillStyle = "#2563eb"
       ctx.fillRect(x + 12, y + 34, 24, 18)
       ctx.fillStyle = "#38bdf8"
       ctx.fillRect(x + 9, y + 12, 5, 10)
       ctx.fillRect(x + 34, y + 12, 5, 10)
     } else if (themeKey === "manga") {
-      // Bandana vermelha + túnica do Sensei Kenji
       ctx.fillStyle = "#dc2626"
       ctx.fillRect(x + 11, y + 9, 26, 5)
       ctx.fillRect(x + 12, y + 34, 24, 18)
     } else if (themeKey === "fashion") {
-      // Óculos pixel + jaqueta rosa da Stylist Chloe
       ctx.fillStyle = "#db2777"
       ctx.fillRect(x + 12, y + 34, 24, 18)
       ctx.fillStyle = "#0f172a"
@@ -2458,19 +2502,16 @@ window.Robolingo = (() => {
       ctx.fillRect(x + 15, y + 17, 7, 3)
       ctx.fillRect(x + 26, y + 17, 7, 3)
     } else if (themeKey === "movies") {
-      // Boina + cachecol dourado do Diretor Leo
       ctx.fillStyle = "#d97706"
       ctx.fillRect(x + 11, y + 3, 26, 7)
       ctx.fillStyle = "#facc15"
       ctx.fillRect(x + 20, y + 34, 8, 18)
     } else if (themeKey === "reading") {
-      // Manto mágico roxo da Mestra Clara
       ctx.fillStyle = "#7c3aed"
       ctx.fillRect(x + 11, y + 4, 26, 8)
       ctx.fillRect(x + 11, y + 34, 26, 22)
     }
 
-    // Placa com nome acima do Mentor
     ctx.font = 'bold 8px "Press Start 2P", monospace'
     const tag = themeInfo.shortTag
     const textW = ctx.measureText(tag).width
@@ -2483,7 +2524,6 @@ window.Robolingo = (() => {
     ctx.fillStyle = "#f8fafc"
     ctx.fillText(tag, x + w / 2 - textW / 2, y - 12)
 
-    // Ícone de missão (!) flutuante
     ctx.fillStyle = "#facc15"
     ctx.fillText("!", x + w / 2 - 4, y - 28 + floatY)
 
@@ -2684,7 +2724,6 @@ window.Robolingo = (() => {
     const scaleX = mmCanvas.width / (70 * 48)
     const scaleY = mmCanvas.height / (40 * 48)
 
-    // Baús ainda não abertos (pontos dourados)
     chests.forEach((ch) => {
       if (state.openedChests.includes(ch.id)) return
       const wx = ch.position.x - backgroundObj.position.x + 24
@@ -2693,7 +2732,6 @@ window.Robolingo = (() => {
       ctx.fillRect(wx * scaleX - 2, wy * scaleY - 2, 4, 4)
     })
 
-    // 7 Mentores (pontos ciano/coloridos)
     characters.forEach((npc) => {
       const theme = THEMES[npc.themeKey] || THEMES.games
       const wx = npc.position.x - backgroundObj.position.x + 24
@@ -2702,7 +2740,6 @@ window.Robolingo = (() => {
       ctx.fillRect(wx * scaleX - 2.5, wy * scaleY - 2.5, 5, 5)
     })
 
-    // Jogador (ponto branco pulsante)
     const px = playerObj.position.x - backgroundObj.position.x + 24
     const py = playerObj.position.y - backgroundObj.position.y + 34
     const pulse = Math.sin(Date.now() / 160) > 0 ? 3.5 : 2.5
@@ -2771,6 +2808,7 @@ window.Robolingo = (() => {
     init,
     openLoginModal,
     submitLogin,
+    togglePortraitStyle,
     cycleZoom,
     toggleMinimap,
     getZoom: () => state.zoom || 1.0,
