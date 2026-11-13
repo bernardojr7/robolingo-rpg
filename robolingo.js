@@ -1,13 +1,120 @@
 window.Robolingo = (() => {
   const THEMES = {
-    games: { label: "🎮 Games & Tech", npcName: "Mentor Axel (Games)" },
-    manga: { label: "📚 HQs & Mangá", npcName: "Sensei Kenji (Mangá)" },
-    cooking: { label: "🍔 Culinária", npcName: "Chef Mia (Culinária)" },
-    fashion: { label: "👟 Moda & Estilo", npcName: "Stylist Chloe (Moda)" },
-    science: { label: "🔬 Ciências", npcName: "Dr. Nova (Ciências)" },
-    movies: { label: "🎬 Filmes & Séries", npcName: "Diretor Leo (Cinema)" },
-    reading: { label: "📖 Leitura", npcName: "Mestra Clara (Livros)" }
+    games: {
+      label: "🎮 Games & Tech",
+      npcName: "Mentor Axel",
+      shortTag: "🎮 Axel",
+      hatColor: "#2563eb",
+      accentColor: "#38bdf8",
+      spriteType: "villager"
+    },
+    manga: {
+      label: "📚 HQs & Mangá",
+      npcName: "Sensei Kenji",
+      shortTag: "📚 Kenji",
+      hatColor: "#dc2626",
+      accentColor: "#f87171",
+      spriteType: "villager"
+    },
+    cooking: {
+      label: "🍔 Culinária",
+      npcName: "Chef Mia",
+      shortTag: "🍔 Mia",
+      hatColor: "#f8fafc",
+      accentColor: "#fb923c",
+      spriteType: "villager"
+    },
+    fashion: {
+      label: "👟 Moda & Estilo",
+      npcName: "Stylist Chloe",
+      shortTag: "👟 Chloe",
+      hatColor: "#db2777",
+      accentColor: "#f472b6",
+      spriteType: "villager"
+    },
+    science: {
+      label: "🔬 Ciências",
+      npcName: "Dr. Nova",
+      shortTag: "🔬 Dr. Nova",
+      hatColor: "#059669",
+      accentColor: "#34d399",
+      spriteType: "oldMan"
+    },
+    movies: {
+      label: "🎬 Filmes & Séries",
+      npcName: "Diretor Leo",
+      shortTag: "🎬 Leo",
+      hatColor: "#d97706",
+      accentColor: "#facc15",
+      spriteType: "oldMan"
+    },
+    reading: {
+      label: "📖 Leitura",
+      npcName: "Mestra Clara",
+      shortTag: "📖 Clara",
+      hatColor: "#7c3aed",
+      accentColor: "#c084fc",
+      spriteType: "oldMan"
+    }
   }
+
+  const MENTOR_SPOTS = [
+    { theme: "games", col: 21, row: 18 },
+    { theme: "manga", col: 31, row: 18 },
+    { theme: "science", col: 25, row: 13 },
+    { theme: "cooking", col: 18, row: 23 },
+    { theme: "movies", col: 33, row: 23 },
+    { theme: "fashion", col: 25, row: 26 },
+    { theme: "reading", col: 38, row: 16 }
+  ]
+
+  const CHEST_SPOTS = [
+    {
+      id: "chest_1",
+      col: 16,
+      row: 15,
+      word: "Level up!",
+      meaning: "Subir de nível / Evoluir",
+      example: "Keep practicing English to level up your skills!",
+      tip: "Muito usada em jogos e estudos para indicar progresso."
+    },
+    {
+      id: "chest_2",
+      col: 36,
+      row: 12,
+      word: "Piece of cake",
+      meaning: "Moleza / Muito fácil",
+      example: "This English mission was a piece of cake!",
+      tip: "Expressão idiomática usada quando algo é muito simples de fazer."
+    },
+    {
+      id: "chest_3",
+      col: 15,
+      row: 27,
+      word: "Never give up",
+      meaning: "Nunca desista",
+      example: "Even when a challenge is hard, never give up!",
+      tip: "'Give up' significa desistir."
+    },
+    {
+      id: "chest_4",
+      col: 37,
+      row: 27,
+      word: "Awesome job!",
+      meaning: "Trabalho incrível! / Mandou bem!",
+      example: "You solved the puzzle. Awesome job!",
+      tip: "'Awesome' é um elogio muito comum no dia a dia em inglês."
+    },
+    {
+      id: "chest_5",
+      col: 29,
+      row: 14,
+      word: "Hidden treasure",
+      meaning: "Tesouro escondido",
+      example: "You found a hidden treasure in Robolingo Village!",
+      tip: "'Hidden' = escondido | 'Treasure' = tesouro."
+    }
+  ]
 
   const QUESTIONS = {
     games: {
@@ -692,11 +799,14 @@ window.Robolingo = (() => {
   }
 
   const SHOP_ITEMS = [
-    { id: "cap", name: "🧢 Boné Azul", price: 0, desc: "Boné clássico da Academia" },
-    { id: "headset", name: "🎧 Headset Neon", price: 25, desc: "Fone gamer para ouvir inglês" },
-    { id: "glasses", name: "🕶️ Óculos Pixel", price: 45, desc: "Estilo lendário na vila" },
-    { id: "crown", name: "👑 Coroa de Ouro", price: 80, desc: "Para mestres do vocabulário" },
-    { id: "aura", name: "✨ Aura Dourada", price: 120, desc: "Brilho especial ao caminhar" }
+    { id: "cap", slot: "hat", name: "🧢 Boné Azul", price: 0, desc: "Boné clássico da Academia" },
+    { id: "headset", slot: "hat", name: "🎧 Headset Neon", price: 25, desc: "Fone gamer para ouvir inglês" },
+    { id: "glasses", slot: "hat", name: "🕶️ Óculos Pixel", price: 45, desc: "Estilo lendário na vila" },
+    { id: "crown", slot: "hat", name: "👑 Coroa de Ouro", price: 80, desc: "Para mestres do vocabulário" },
+    { id: "aura", slot: "hat", name: "✨ Aura Dourada", price: 120, desc: "Brilho especial ao caminhar" },
+    { id: "pet_dog", slot: "pet", name: "🤖 Pet: Robô-Cão", price: 50, desc: "Companheiro fiel que segue você" },
+    { id: "pet_owl", slot: "pet", name: "🦉 Pet: Coruja Pixel", price: 75, desc: "Guardiã da sabedoria no mapa" },
+    { id: "pet_dragon", slot: "pet", name: "🐉 Pet: Mini Dragão", price: 110, desc: "Dragão lendário seguidor" }
   ]
 
   const CLASSMATES = [
@@ -706,7 +816,7 @@ window.Robolingo = (() => {
     { name: "Mariana R.", theme: "🎬 Filmes & Séries", xp: 90 }
   ]
 
-  const STORAGE_KEY = "robolingo_rpg_save_v2"
+  const STORAGE_KEY = "robolingo_rpg_save_v3"
 
   let state = {
     registered: false,
@@ -718,19 +828,26 @@ window.Robolingo = (() => {
     streak: 0,
     owned: ["cap"],
     equipped: "cap",
+    equippedPet: null,
+    openedChests: [],
     solvedCount: 0
   }
 
   let currentQuestion = null
+  let activeMissionTheme = "games"
   let lastQuestionEn = ""
   let questionAnswered = false
   let textRevealed = false
   let selectedWordIndices = []
   let shuffledWords = []
+  let activeChest = null
+  let petPos = { x: null, y: null }
 
   function loadState() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY)
+      const raw =
+        localStorage.getItem(STORAGE_KEY) ||
+        localStorage.getItem("robolingo_rpg_save_v2")
       if (raw) {
         state = { ...state, ...JSON.parse(raw) }
       }
@@ -816,6 +933,7 @@ window.Robolingo = (() => {
     const hudXp = document.getElementById("hudXp")
     const hudCoins = document.getElementById("hudCoins")
     const hudStreak = document.getElementById("hudStreak")
+    const hudChests = document.getElementById("hudChests")
 
     if (!hudName) return
     const themeInfo = THEMES[state.theme] || THEMES.games
@@ -823,6 +941,10 @@ window.Robolingo = (() => {
     hudMeta.textContent = `Nv.${state.level} • ${themeInfo.label}`
     hudXp.textContent = `${state.xp} XP`
     hudCoins.textContent = `${state.coins}`
+
+    if (hudChests) {
+      hudChests.textContent = `${state.openedChests.length}/${CHEST_SPOTS.length}`
+    }
 
     if (hudStreak) {
       if (state.streak > 0) {
@@ -837,14 +959,16 @@ window.Robolingo = (() => {
   }
 
   function isModalOpen() {
-    return ["loginModal", "missionModal", "shopModal", "rankModal"].some((id) => {
-      const el = document.getElementById(id)
-      return el && el.style.display === "flex"
-    })
+    return ["loginModal", "missionModal", "shopModal", "rankModal", "chestModal"].some(
+      (id) => {
+        const el = document.getElementById(id)
+        return el && el.style.display === "flex"
+      }
+    )
   }
 
   function closeAllModals() {
-    ;["missionModal", "shopModal", "rankModal"].forEach((id) => {
+    ;["missionModal", "shopModal", "rankModal", "chestModal"].forEach((id) => {
       const el = document.getElementById(id)
       if (el) el.style.display = "none"
     })
@@ -881,8 +1005,9 @@ window.Robolingo = (() => {
     }
   }
 
-  function getRandomQuestion() {
-    const themeBank = QUESTIONS[state.theme] || QUESTIONS.games
+  function getRandomQuestion(themeKey) {
+    const targetTheme = THEMES[themeKey] ? themeKey : state.theme
+    const themeBank = QUESTIONS[targetTheme] || QUESTIONS.games
     const levelBank = themeBank[state.level] || themeBank[1]
     const candidates = levelBank.filter((q) => q.en !== lastQuestionEn)
     const pool = candidates.length > 0 ? candidates : levelBank
@@ -897,7 +1022,6 @@ window.Robolingo = (() => {
     const enText = document.getElementById("missionEnText")
     const revealBtn = document.getElementById("btnRevealText")
     enText.textContent = `"${currentQuestion.en}"`
-    enText.style.filter = "none"
     if (revealBtn) revealBtn.style.display = "none"
     playTone("click")
   }
@@ -968,18 +1092,19 @@ window.Robolingo = (() => {
     finalizeMissionResult(isCorrect, source, expectedSentence)
   }
 
-  function openMission(source = "hud") {
+  function openMission(source = "hud", customTheme = null) {
     closeAllModals()
     if (typeof battle !== "undefined") {
       battle.initiated = true
     }
 
-    currentQuestion = getRandomQuestion()
+    activeMissionTheme = customTheme || state.theme
+    currentQuestion = getRandomQuestion(activeMissionTheme)
     questionAnswered = false
     textRevealed = currentQuestion.type !== "listen"
     selectedWordIndices = []
 
-    const themeInfo = THEMES[state.theme] || THEMES.games
+    const themeInfo = THEMES[activeMissionTheme] || THEMES.games
     const badge = document.getElementById("missionSourceBadge")
     const streakBanner = document.getElementById("missionStreakBanner")
     const enText = document.getElementById("missionEnText")
@@ -989,7 +1114,10 @@ window.Robolingo = (() => {
     const wordBuilderBox = document.getElementById("wordBuilderContainer")
     const feedback = document.getElementById("missionFeedback")
 
-    if (currentQuestion.type === "listen") {
+    if (source === "npc") {
+      badge.textContent = `💬 ${themeInfo.npcName.toUpperCase()} (${themeInfo.label})`
+      badge.style.background = "#1d4ed8"
+    } else if (currentQuestion.type === "listen") {
       badge.textContent = "🎧 ESCUTA PURA • 2X MOEDAS"
       badge.style.background = "#0e7490"
     } else if (currentQuestion.type === "order") {
@@ -998,9 +1126,6 @@ window.Robolingo = (() => {
     } else if (source === "grass") {
       badge.textContent = "⚡ ENCONTRO NA GRAMA"
       badge.style.background = "#15803d"
-    } else if (source === "npc") {
-      badge.textContent = `💬 ${themeInfo.npcName.toUpperCase()}`
-      badge.style.background = "#1d4ed8"
     } else {
       badge.textContent = `🎯 MISSÃO • ${themeInfo.label.toUpperCase()}`
       badge.style.background = "#7e22ce"
@@ -1041,7 +1166,6 @@ window.Robolingo = (() => {
       wordBuilderBox.style.display = "none"
       optionsBox.style.display = "block"
 
-      // Embaralha automaticamente as alternativas A, B e C
       const shuffledOpts = currentQuestion.options.map((text, idx) => ({
         text,
         isCorrect: idx === currentQuestion.correct
@@ -1139,7 +1263,7 @@ window.Robolingo = (() => {
         <div style="color:#e2e8f0; font-size:9px; line-height:1.5;">💡 ${
           currentQuestion.tip
         }</div>
-        <button onclick="Robolingo.openMission('${source}')" style="margin-top:10px; width:100%; padding:9px; background:#16a34a; color:#fff; border-radius:8px; font-size:9px;">
+        <button onclick="Robolingo.openMission('${source}', '${activeMissionTheme}')" style="margin-top:10px; width:100%; padding:9px; background:#16a34a; color:#fff; border-radius:8px; font-size:9px;">
           ▶ Próxima Missão
         </button>
       `
@@ -1161,11 +1285,46 @@ window.Robolingo = (() => {
         <div style="color:#e2e8f0; font-size:9px; line-height:1.5;">💡 ${
           currentQuestion.tip
         }</div>
-        <button onclick="Robolingo.openMission('${source}')" style="margin-top:10px; width:100%; padding:9px; background:#dc2626; color:#fff; border-radius:8px; font-size:9px;">
+        <button onclick="Robolingo.openMission('${source}', '${activeMissionTheme}')" style="margin-top:10px; width:100%; padding:9px; background:#dc2626; color:#fff; border-radius:8px; font-size:9px;">
           ↻ Tentar Novo Desafio
         </button>
       `
     }
+  }
+
+  function openChest(chestSpot) {
+    closeAllModals()
+    if (typeof battle !== "undefined") battle.initiated = true
+    activeChest = chestSpot
+
+    const alreadyOpened = state.openedChests.includes(chestSpot.id)
+    const rewardBox = document.getElementById("chestRewardBanner")
+
+    document.getElementById("chestWord").textContent = `"${chestSpot.word}"`
+    document.getElementById("chestMeaning").textContent = `Tradução: ${chestSpot.meaning}`
+    document.getElementById("chestExample").textContent = `Exemplo: "${chestSpot.example}"`
+    document.getElementById("chestTip").textContent = `💡 ${chestSpot.tip}`
+
+    if (!alreadyOpened) {
+      state.openedChests.push(chestSpot.id)
+      state.xp += 15
+      state.coins += 15
+      saveState()
+      playTone("win")
+      rewardBox.style.background = "#052e16"
+      rewardBox.style.borderColor = "#22c55e"
+      rewardBox.style.color = "#4ade80"
+      rewardBox.textContent = `🎉 BAÚ DESCOBERTO (${state.openedChests.length}/${CHEST_SPOTS.length})! +15 XP e +15 EduCoins!`
+    } else {
+      playTone("click")
+      rewardBox.style.background = "#1e293b"
+      rewardBox.style.borderColor = "#64748b"
+      rewardBox.style.color = "#cbd5e1"
+      rewardBox.textContent = `📦 Baú já coletado (${state.openedChests.length}/${CHEST_SPOTS.length}). Revise a expressão!`
+    }
+
+    document.getElementById("chestModal").style.display = "flex"
+    setTimeout(() => speakEnglish(chestSpot.word, 0.9), 200)
   }
 
   function openShop() {
@@ -1178,7 +1337,10 @@ window.Robolingo = (() => {
 
     SHOP_ITEMS.forEach((item) => {
       const owned = state.owned.includes(item.id)
-      const equipped = state.equipped === item.id
+      const equipped =
+        item.slot === "pet"
+          ? state.equippedPet === item.id
+          : state.equipped === item.id
 
       const card = document.createElement("div")
       card.className = "robo-shop-card"
@@ -1195,20 +1357,28 @@ window.Robolingo = (() => {
       `
       card.querySelector("button").onclick = () => {
         if (owned) {
-          state.equipped = item.id
+          if (item.slot === "pet") {
+            state.equippedPet = state.equippedPet === item.id ? null : item.id
+          } else {
+            state.equipped = item.id
+          }
           saveState()
           playTone("click")
           openShop()
         } else if (state.coins >= item.price) {
           state.coins -= item.price
           state.owned.push(item.id)
-          state.equipped = item.id
+          if (item.slot === "pet") {
+            state.equippedPet = item.id
+          } else {
+            state.equipped = item.id
+          }
           saveState()
           playTone("win")
           openShop()
         } else {
           playTone("wrong")
-          alert("EduCoins insuficientes! Complete mais missões de inglês na vila.")
+          alert("EduCoins insuficientes! Fale com os Mentores ou abra Baús na vila.")
         }
       }
       list.appendChild(card)
@@ -1256,8 +1426,147 @@ window.Robolingo = (() => {
     document.getElementById("rankModal").style.display = "flex"
   }
 
+  function drawNpcDecorations(ctx, char) {
+    const themeInfo = THEMES[char.themeKey] || THEMES.games
+    const x = char.position.x
+    const y = char.position.y
+    const w = char.width || 48
+
+    ctx.save()
+
+    // Chapéu / detalhe temático do Mentor
+    ctx.fillStyle = themeInfo.hatColor
+    ctx.fillRect(x + 12, y + 2, 24, 7)
+    ctx.fillStyle = themeInfo.accentColor
+    ctx.fillRect(x + 15, y + 7, 18, 3)
+
+    // Placa com nome e matéria acima do Mentor
+    ctx.font = 'bold 8px "Press Start 2P", monospace'
+    const tag = themeInfo.shortTag
+    const textW = ctx.measureText(tag).width
+    ctx.fillStyle = "rgba(15, 23, 42, 0.85)"
+    ctx.fillRect(x + w / 2 - textW / 2 - 5, y - 20, textW + 10, 14)
+    ctx.strokeStyle = themeInfo.accentColor
+    ctx.lineWidth = 1.5
+    ctx.strokeRect(x + w / 2 - textW / 2 - 5, y - 20, textW + 10, 14)
+
+    ctx.fillStyle = "#f8fafc"
+    ctx.fillText(tag, x + w / 2 - textW / 2, y - 10)
+
+    ctx.restore()
+  }
+
+  function drawChest(ctx, chest) {
+    const opened = state.openedChests.includes(chest.id)
+    const x = chest.position.x + 8
+    const y = chest.position.y + 12
+
+    ctx.save()
+    // Sombra
+    ctx.fillStyle = "rgba(0,0,0,0.35)"
+    ctx.fillRect(x + 2, y + 22, 28, 6)
+
+    // Corpo do baú
+    ctx.fillStyle = opened ? "#78350f" : "#b45309"
+    ctx.fillRect(x, y + 8, 32, 16)
+    ctx.strokeStyle = "#0f172a"
+    ctx.lineWidth = 2
+    ctx.strokeRect(x, y + 8, 32, 16)
+
+    // Tampa
+    ctx.fillStyle = opened ? "#451a03" : "#d97706"
+    ctx.fillRect(x, opened ? y : y + 2, 32, 8)
+    ctx.strokeRect(x, opened ? y : y + 2, 32, 8)
+
+    // Fechadura dourada se ainda estiver fechado
+    if (!opened) {
+      ctx.fillStyle = "#facc15"
+      ctx.fillRect(x + 13, y + 8, 6, 7)
+    }
+
+    ctx.restore()
+  }
+
+  function drawFollowerPet(ctx, playerObj) {
+    if (!state.equippedPet || !playerObj || !playerObj.position) return
+
+    const dir = window.lastKey || "s"
+    let offsetX = -34
+    let offsetY = 22
+    if (dir === "d") {
+      offsetX = -36
+      offsetY = 24
+    } else if (dir === "a") {
+      offsetX = 50
+      offsetY = 24
+    } else if (dir === "w") {
+      offsetX = 10
+      offsetY = 54
+    } else {
+      offsetX = -34
+      offsetY = 18
+    }
+
+    const targetX = playerObj.position.x + offsetX
+    const targetY = playerObj.position.y + offsetY
+
+    if (petPos.x === null || Math.hypot(targetX - petPos.x, targetY - petPos.y) > 220) {
+      petPos.x = targetX
+      petPos.y = targetY
+    } else {
+      petPos.x += (targetX - petPos.x) * 0.08
+      petPos.y += (targetY - petPos.y) * 0.08
+    }
+
+    const bounce = Math.sin(Date.now() / 170) * 2.5
+    const px = petPos.x
+    const py = petPos.y + bounce
+
+    ctx.save()
+    // Sombra do pet
+    ctx.fillStyle = "rgba(0,0,0,0.35)"
+    ctx.beginPath()
+    ctx.ellipse(px + 13, petPos.y + 25, 11, 4, 0, 0, Math.PI * 2)
+    ctx.fill()
+
+    if (state.equippedPet === "pet_dog") {
+      // Robô-Cão Azul e Ciano
+      ctx.fillStyle = "#38bdf8"
+      ctx.fillRect(px + 4, py + 8, 18, 13)
+      ctx.fillStyle = "#1d4ed8"
+      ctx.fillRect(px + 2, py + 4, 6, 7)
+      ctx.fillRect(px + 18, py + 4, 6, 7)
+      ctx.fillStyle = "#facc15"
+      ctx.fillRect(px + 8, py + 12, 3, 3)
+      ctx.fillRect(px + 15, py + 12, 3, 3)
+    } else if (state.equippedPet === "pet_owl") {
+      // Coruja Pixel Roxa e Dourada
+      ctx.fillStyle = "#7e22ce"
+      ctx.fillRect(px + 5, py + 5, 16, 17)
+      ctx.fillStyle = "#facc15"
+      ctx.fillRect(px + 7, py + 9, 4, 4)
+      ctx.fillRect(px + 15, py + 9, 4, 4)
+      ctx.fillStyle = "#fb923c"
+      ctx.fillRect(px + 12, py + 13, 3, 3)
+    } else if (state.equippedPet === "pet_dragon") {
+      // Mini Dragão Esmeralda e Fogo
+      ctx.fillStyle = "#16a34a"
+      ctx.fillRect(px + 4, py + 6, 18, 16)
+      ctx.fillStyle = "#facc15"
+      ctx.fillRect(px + 6, py + 2, 4, 4)
+      ctx.fillRect(px + 16, py + 2, 4, 4)
+      ctx.fillStyle = "#ef4444"
+      ctx.fillRect(px + 8, py + 10, 3, 3)
+      ctx.fillRect(px + 15, py + 10, 3, 3)
+    }
+
+    ctx.restore()
+  }
+
   function drawPlayerCosmetics(ctx, playerObj) {
     if (!playerObj || !playerObj.position) return
+    drawFollowerPet(ctx, playerObj)
+
     const x = playerObj.position.x
     const y = playerObj.position.y
     const w = playerObj.width || 48
@@ -1358,23 +1667,31 @@ window.Robolingo = (() => {
   }
 
   return {
+    THEMES,
+    MENTOR_SPOTS,
+    CHEST_SPOTS,
     init,
     openLoginModal,
     submitLogin,
     openMission,
+    openChest,
     openShop,
     openRanking,
     closeAllModals,
     revealListeningText,
     speakCurrent: () => currentQuestion && speakEnglish(currentQuestion.en, 0.92),
     speakSlow: () => currentQuestion && speakEnglish(currentQuestion.en, 0.62),
+    speakChestWord: () => activeChest && speakEnglish(activeChest.word, 0.9),
+    speakChestExample: () => activeChest && speakEnglish(activeChest.example, 0.9),
+    drawNpcDecorations,
+    drawChest,
     drawPlayerCosmetics,
     isModalOpen,
-    getNpcGreeting: () => {
-      const themeInfo = THEMES[state.theme] || THEMES.games
+    getNpcGreetingForTheme: (themeKey) => {
+      const themeInfo = THEMES[themeKey] || THEMES.games
       return [
-        `Hello, ${state.name}! I am ${themeInfo.npcName}.`,
-        "Ready for an English challenge? Press Space or tap Falar!"
+        `Hello, ${state.name}! I am ${themeInfo.npcName} (${themeInfo.label}).`,
+        "Press Space or tap Falar again to start my English challenge!"
       ]
     }
   }
