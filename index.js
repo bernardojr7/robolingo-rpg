@@ -286,9 +286,17 @@ function buildMap(mapId, customSpawn = null) {
   characters = []
   chests = []
 
-  bgImage.src = mapConfig.imageSrc
+  background.image.onerror = () => {
+    if (background.image.src.endsWith('.png')) {
+      background.image.src = background.image.src.replace(/\.png$/, '.jpg')
+    } else {
+      console.error('Imagem do mapa não encontrada:', background.image.src)
+    }
+  }
+  background.image.src = mapConfig.imageSrc
+
   if (mapConfig.foregroundSrc) {
-    fgImage.src = mapConfig.foregroundSrc
+    foreground.image.src = mapConfig.foregroundSrc
     hasForeground = true
   } else {
     hasForeground = false
