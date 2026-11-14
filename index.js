@@ -138,10 +138,10 @@ const MAPS = {
       "######........####..###..........#######",
       "######...........................#######",
       "##########.##....................#######",
-      "##########.##.#.##......#.####.###########",
-      "##########.#...#.####.####.#.##.#.##...######",
+      "##########.##.#.##......#.####.#########",
+      "##########.#...#.####.####.#.##.#.##.###",
       "######....#.####.####.#..##.....#.######",
-      "######....#.##.#.####.#.......##..#####",
+      "######....#.##.#.####.#.......##..######",
       "################.####.#..2....2....#####",
       "################.####.###..........#####",
       "###############........#################",
@@ -234,13 +234,6 @@ const player = new Sprite({
 })
 
 const bgImage = new Image()
-// Fallback automático caso a imagem tenha sido salva como .jpg em vez de .png
-bgImage.onerror = () => {
-  if (bgImage.src.endsWith('.png')) {
-    bgImage.src = bgImage.src.replace(/\.png$/, '.jpg')
-  }
-}
-
 const fgImage = new Image()
 
 const background = new Sprite({
@@ -286,11 +279,15 @@ function buildMap(mapId, customSpawn = null) {
   characters = []
   chests = []
 
+  let retryCount = 0
   background.image.onerror = () => {
-    if (background.image.src.endsWith('.png')) {
-      background.image.src = background.image.src.replace(/\.png$/, '.jpg')
+    if (retryCount < 2) {
+      retryCount++
+      setTimeout(() => {
+        background.image.src = `${mapConfig.imageSrc}?retry=${retryCount}`
+      }, 400)
     } else {
-      console.error('Imagem do mapa não encontrada:', background.image.src)
+      console.error('Falha ao carregar imagem do mapa:', mapConfig.imageSrc)
     }
   }
   background.image.src = mapConfig.imageSrc
