@@ -1,145 +1,205 @@
 const canvas = document.querySelector('#gameCanvas')
 const c = canvas.getContext('2d')
 
-const collisionsMap = []
-for (let i = 0; i < collisions.length; i += 70) {
-  collisionsMap.push(collisions.slice(i, 70 + i))
+// ============================================================================
+// 1. MAPAS E INTERIORES DO ROBOLINGO
+// Legenda:
+//   '#' = Parede / Obstáculo    | '.' = Chão livre
+//   'P' = Porta de saída        | '1', '2', '3' = Portas de entrada
+//   'S' = Ponto de chegada      | 'G' = Grama / Zona de missão surpresa
+// ============================================================================
+const MAPS = {
+  // Mapa inicial: Vila da Ciência (40x24 = 1920x1152px)
+  science_village: {
+    imageSrc: './img/science_village.png',
+    foregroundSrc: null,
+    defaultSpawn: { col: 20, row: 14 }, // Praça central abaixo da fonte
+    matrix: [
+      "########################################",
+      "########.......###...###################",
+      "########..............####........###.##",
+      "####......##..............#######.######",
+      "####....####.............######.##.#####",
+      "############..#####..###.##########.####",
+      "#####...###.....#####..#.###...####.####",
+      "####..######.....####..#.###111####.####", // '1' = Porta do Laboratório
+      "###...####.#...#.##....#..........#.####",
+      "##....####.#...#...22..#............####", // '2' = Casa superior
+      "####.##.#..#...####..#######...####.####",
+      "###.#####...........................####",
+      "##..###...#.##...........##.........####",
+      "##........######........####....#...####",
+      "##..###...######........####....##..####",
+      "###.###..####..#........##.......#..####",
+      "#######..####22#..........22.....#..####", // '2' = Casas inferiores
+      "#######......................###.#..####",
+      "##############.......###.#######.##.####",
+      "##################...###################",
+      "##################...###.###############",
+      "###############.........################",
+      "###############.........#######.########",
+      "################333#####################"  // '3' = Estrada para GraçaTown
+    ],
+    doors: {
+      '1': { targetMap: 'robotics', targetSpawn: { col: 9, row: 12 } },
+      '2': { targetMap: 'arcane_library', targetSpawn: { col: 9, row: 12 } },
+      '3': { targetMap: 'gracatown', targetSpawn: { col: 19, row: 20 } }
+    },
+    mentors: [
+      { col: 16, row: 11, theme: 'greetings' },
+      { col: 23, row: 11, theme: 'travel' }
+    ],
+    chests: [
+      { col: 25, row: 12, id: 'chest_village_1' }
+    ]
+  },
+
+  // Interior do Laboratório de Robótica (20x16 = 960x768px)
+  robotics: {
+    imageSrc: './img/robotics.png',
+    foregroundSrc: null,
+    defaultSpawn: { col: 9, row: 12 },
+    matrix: [
+      "####################",
+      "####################",
+      "####################",
+      "####################",
+      "####################",
+      "#..................#",
+      "#...............#..#",
+      "####...........#####",
+      "####...........###.#",
+      "#................#.#",
+      "##................##",
+      "##................##",
+      "#######..S...####.##",
+      "#########..#########",
+      "#########PP#########",
+      "####################"
+    ],
+    doors: {
+      'P': { targetMap: 'return', fallbackMap: 'science_village' }
+    },
+    mentors: [
+      { col: 10, row: 6, theme: 'technology' }
+    ],
+    chests: [
+      { col: 4, row: 6, id: 'chest_lab_1' }
+    ]
+  },
+
+  // Interior da Taverna / Biblioteca (20x16 = 960x768px)
+  arcane_library: {
+    imageSrc: './img/arcane_library.png',
+    foregroundSrc: null,
+    defaultSpawn: { col: 9, row: 12 },
+    matrix: [
+      "####################",
+      "####################",
+      "####################",
+      "#########..#########",
+      "#########...###..###",
+      "##.######........###",
+      "##............#..###",
+      "##.####.....####.###",
+      "##.####......###.###",
+      "##...............###",
+      "##...#........#...##",
+      "##..###.....####..##",
+      "###.###..S...####.##",
+      "####..............##",
+      "#########PP#########",
+      "####################"
+    ],
+    doors: {
+      'P': { targetMap: 'return', fallbackMap: 'science_village' }
+    },
+    mentors: [
+      { col: 6, row: 6, theme: 'food' }
+    ],
+    chests: [
+      { col: 12, row: 6, id: 'chest_tavern_1' }
+    ]
+  },
+
+  // Cidade Eco-Tecnológica: GraçaTown (40x24 = 1920x1152px)
+  gracatown: {
+    imageSrc: './img/gracatown.png',
+    foregroundSrc: null,
+    defaultSpawn: { col: 19, row: 20 },
+    matrix: [
+      "########################################",
+      "##############################.#########",
+      "#########################............###",
+      "######......#############.####.####..###",
+      "##########..#.###########.####.####..###",
+      "##########..#####..######.#....#.###.###",
+      "##########..######11###...#11###1....###",
+      "######........####..###..........#######",
+      "######...........................#######",
+      "##########.##....................#######",
+      "##########.##.#.##......#.####.###########",
+      "##########.#...#.####.####.#.##.#.##...######",
+      "######....#.####.####.#..##.....#.######",
+      "######....#.##.#.####.#.......##..#####",
+      "################.####.#..2....2....#####",
+      "################.####.###..........#####",
+      "###############........#################",
+      "##############............#######.######",
+      "########.##.##.##...#####.#.#.###.######",
+      "#######.1..1...#....#####.#1.1.#...#####",
+      "#######........##...#####..........#####",
+      "#############.###...########....########",
+      "################.....###################",
+      "################PPPPPP##################"
+    ],
+    doors: {
+      '1': { targetMap: 'robotics', targetSpawn: { col: 9, row: 12 } },
+      '2': { targetMap: 'arcane_library', targetSpawn: { col: 9, row: 12 } },
+      'P': { targetMap: 'science_village', targetSpawn: { col: 17, row: 21 } }
+    },
+    mentors: [
+      { col: 19, row: 8, theme: 'nature' }
+    ],
+    chests: [
+      { col: 24, row: 8, id: 'chest_graca_1' }
+    ]
+  },
+
+  // Mapa clássico original (mantido como reserva)
+  pellet_town: {
+    imageSrc: './img/Pellet Town.png',
+    foregroundSrc: './img/foregroundObjects.png',
+    cols: 70,
+    offset: { x: -735, y: -650 },
+    useLegacyData: true,
+    doors: []
+  }
 }
 
-const battleZonesMap = []
-for (let i = 0; i < battleZonesData.length; i += 70) {
-  battleZonesMap.push(battleZonesData.slice(i, 70 + i))
-}
+const INITIAL_MAP = 'science_village'
 
-const boundaries = []
-const offset = {
-  x: -735,
-  y: -650
-}
+// ============================================================================
+// 2. ESTADO DO MUNDO E ENTIDADES ATIVAS
+// ============================================================================
+let collisionsMap = []
+let battleZonesMap = []
+let boundaries = []
+let battleZones = []
+let doorZones = []
+let characters = []
+let chests = []
+const movables = []
 
-collisionsMap.forEach((row, i) => {
-  row.forEach((symbol, j) => {
-    if (symbol === 1025)
-      boundaries.push(
-        new Boundary({
-          position: {
-            x: j * Boundary.width + offset.x,
-            y: i * Boundary.height + offset.y
-          }
-        })
-      )
-  })
-})
-
-const battleZones = []
-battleZonesMap.forEach((row, i) => {
-  row.forEach((symbol, j) => {
-    if (symbol === 1025)
-      battleZones.push(
-        new Boundary({
-          position: {
-            x: j * Boundary.width + offset.x,
-            y: i * Boundary.height + offset.y
-          }
-        })
-      )
-  })
-})
+let currentMapId = INITIAL_MAP
+let returnPortal = null
+let isTransitioning = false
 
 const villagerImg = new Image()
 villagerImg.src = './img/villager/Idle.png'
 
 const oldManImg = new Image()
 oldManImg.src = './img/oldMan/Idle.png'
-
-const occupiedTiles = new Set(['25,18', '25,19', '26,18', '26,19'])
-
-function isTileWalkable(col, row) {
-  if (row < 1 || row >= collisionsMap.length - 1 || col < 1 || col >= 69) {
-    return false
-  }
-  if (collisionsMap[row][col] === 1025) return false
-  if (battleZonesMap[row] && battleZonesMap[row][col] === 1025) return false
-  if (occupiedTiles.has(`${col},${row}`)) return false
-  return true
-}
-
-function findWalkableTile(targetCol, targetRow) {
-  for (let radius = 0; radius <= 8; radius++) {
-    for (let dy = -radius; dy <= radius; dy++) {
-      for (let dx = -radius; dx <= radius; dx++) {
-        const cCol = targetCol + dx
-        const cRow = targetRow + dy
-        if (isTileWalkable(cCol, cRow)) {
-          occupiedTiles.add(`${cCol},${cRow}`)
-          return { col: cCol, row: cRow }
-        }
-      }
-    }
-  }
-  return { col: targetCol, row: targetRow }
-}
-
-// Posiciona os 7 Mentores temáticos na vila
-const characters = []
-const mentorSpots = window.Robolingo ? window.Robolingo.MENTOR_SPOTS : []
-
-mentorSpots.forEach((spot) => {
-  const tile = findWalkableTile(spot.col, spot.row)
-  const themeMeta =
-    window.Robolingo && window.Robolingo.THEMES[spot.theme]
-      ? window.Robolingo.THEMES[spot.theme]
-      : { spriteType: 'villager' }
-
-  const worldX = tile.col * Boundary.width + offset.x
-  const worldY = tile.row * Boundary.height + offset.y
-
-  const npc = new Character({
-    position: { x: worldX, y: worldY },
-    image: themeMeta.spriteType === 'oldMan' ? oldManImg : villagerImg,
-    frames: { max: 4, hold: 60 },
-    scale: 3,
-    animate: true,
-    dialogue: ['Hello! Ready to practice English?']
-  })
-  npc.themeKey = spot.theme
-  characters.push(npc)
-
-  boundaries.push(
-    new Boundary({
-      position: { x: worldX, y: worldY }
-    })
-  )
-})
-
-// Posiciona os 5 Baús de Vocabulário na vila
-const chests = []
-const chestSpots = window.Robolingo ? window.Robolingo.CHEST_SPOTS : []
-
-chestSpots.forEach((spot) => {
-  const tile = findWalkableTile(spot.col, spot.row)
-  const worldX = tile.col * Boundary.width + offset.x
-  const worldY = tile.row * Boundary.height + offset.y
-
-  chests.push({
-    ...spot,
-    position: { x: worldX, y: worldY },
-    width: Boundary.width,
-    height: Boundary.height
-  })
-
-  boundaries.push(
-    new Boundary({
-      position: { x: worldX, y: worldY }
-    })
-  )
-})
-
-const image = new Image()
-image.src = './img/Pellet Town.png'
-
-const foregroundImage = new Image()
-foregroundImage.src = './img/foregroundObjects.png'
 
 const playerDownImage = new Image()
 playerDownImage.src = './img/playerDown.png'
@@ -173,21 +233,26 @@ const player = new Sprite({
   sprites: basePlayerSprites
 })
 
+const bgImage = new Image()
+// Fallback automático caso a imagem tenha sido salva como .jpg em vez de .png
+bgImage.onerror = () => {
+  if (bgImage.src.endsWith('.png')) {
+    bgImage.src = bgImage.src.replace(/\.png$/, '.jpg')
+  }
+}
+
+const fgImage = new Image()
+
 const background = new Sprite({
-  position: {
-    x: offset.x,
-    y: offset.y
-  },
-  image: image
+  position: { x: 0, y: 0 },
+  image: bgImage
 })
 
 const foreground = new Sprite({
-  position: {
-    x: offset.x,
-    y: offset.y
-  },
-  image: foregroundImage
+  position: { x: 0, y: 0 },
+  image: fgImage
 })
+let hasForeground = false
 
 const keys = {
   w: { pressed: false },
@@ -196,22 +261,307 @@ const keys = {
   d: { pressed: false }
 }
 
-const movables = [
-  background,
-  ...boundaries,
-  foreground,
-  ...battleZones,
-  ...characters,
-  ...chests
-]
-
 const battle = {
   initiated: false
 }
 
 window.lastKey = 's'
 
-// Mantém o mapa em tela cheia e o personagem centralizado em qualquer resolução ou zoom
+// ============================================================================
+// 3. CONSTRUTOR DE MAPAS E TRANSIÇÃO DE PORTAS
+// ============================================================================
+function buildMap(mapId, customSpawn = null) {
+  const mapConfig = MAPS[mapId]
+  if (!mapConfig) {
+    console.warn(`Mapa "${mapId}" não encontrado.`)
+    return
+  }
+
+  currentMapId = mapId
+  collisionsMap = []
+  battleZonesMap = []
+  boundaries = []
+  battleZones = []
+  doorZones = []
+  characters = []
+  chests = []
+
+  bgImage.src = mapConfig.imageSrc
+  if (mapConfig.foregroundSrc) {
+    fgImage.src = mapConfig.foregroundSrc
+    hasForeground = true
+  } else {
+    hasForeground = false
+  }
+
+  let spawnTile = customSpawn || mapConfig.defaultSpawn || { col: 10, row: 10 }
+  const occupiedTiles = new Set()
+
+  if (mapConfig.useLegacyData) {
+    const cols = mapConfig.cols || 70
+    for (let i = 0; i < collisions.length; i += cols) {
+      collisionsMap.push(collisions.slice(i, cols + i))
+    }
+    for (let i = 0; i < battleZonesData.length; i += cols) {
+      battleZonesMap.push(battleZonesData.slice(i, cols + i))
+    }
+
+    const offset = mapConfig.offset || { x: -735, y: -650 }
+    background.position = { x: offset.x, y: offset.y }
+    foreground.position = { x: offset.x, y: offset.y }
+
+    collisionsMap.forEach((row, i) => {
+      row.forEach((symbol, j) => {
+        if (symbol === 1025) {
+          boundaries.push(
+            new Boundary({
+              position: {
+                x: j * Boundary.width + offset.x,
+                y: i * Boundary.height + offset.y
+              }
+            })
+          )
+        }
+      })
+    })
+
+    battleZonesMap.forEach((row, i) => {
+      row.forEach((symbol, j) => {
+        if (symbol === 1025) {
+          battleZones.push(
+            new Boundary({
+              position: {
+                x: j * Boundary.width + offset.x,
+                y: i * Boundary.height + offset.y
+              }
+            })
+          )
+        }
+      })
+    })
+
+    const mentorSpots = window.Robolingo ? window.Robolingo.MENTOR_SPOTS : []
+    const chestSpots = window.Robolingo ? window.Robolingo.CHEST_SPOTS : []
+    spawnEntitiesOnMap(mentorSpots, chestSpots, offset, occupiedTiles)
+  } else if (Array.isArray(mapConfig.matrix)) {
+    const rows = mapConfig.matrix.length
+    const cols = mapConfig.matrix[0].length
+
+    for (let r = 0; r < rows; r++) {
+      const cRow = []
+      const bRow = []
+      for (let c = 0; c < cols; c++) {
+        const cell = mapConfig.matrix[r][c] || '.'
+        cRow.push(cell === '#' ? 1025 : 0)
+        bRow.push(cell === 'G' ? 1025 : 0)
+
+        const worldX = c * Boundary.width
+        const worldY = r * Boundary.height
+
+        if (cell === '#') {
+          boundaries.push(new Boundary({ position: { x: worldX, y: worldY } }))
+        } else if (cell === 'G') {
+          battleZones.push(new Boundary({ position: { x: worldX, y: worldY } }))
+        } else if (cell === 'S' && !customSpawn && !mapConfig.defaultSpawn) {
+          spawnTile = { col: c, row: r }
+        } else if (mapConfig.doors && mapConfig.doors[cell]) {
+          const doorInfo = mapConfig.doors[cell]
+          doorZones.push({
+            col: c,
+            row: r,
+            targetMap: doorInfo.targetMap,
+            fallbackMap: doorInfo.fallbackMap,
+            targetSpawn: doorInfo.targetSpawn || null,
+            position: { x: worldX, y: worldY },
+            width: Boundary.width,
+            height: Boundary.height
+          })
+        }
+      }
+      collisionsMap.push(cRow)
+      battleZonesMap.push(bRow)
+    }
+
+    const offset = {
+      x: player.position.x - spawnTile.col * Boundary.width,
+      y: player.position.y - spawnTile.row * Boundary.height
+    }
+
+    background.position = { x: offset.x, y: offset.y }
+    foreground.position = { x: offset.x, y: offset.y }
+
+    boundaries.forEach((b) => {
+      b.position.x += offset.x
+      b.position.y += offset.y
+    })
+    battleZones.forEach((bz) => {
+      bz.position.x += offset.x
+      bz.position.y += offset.y
+    })
+    doorZones.forEach((dz) => {
+      dz.position.x += offset.x
+      dz.position.y += offset.y
+    })
+
+    occupiedTiles.add(`${spawnTile.col},${spawnTile.row}`)
+    spawnEntitiesOnMap(
+      mapConfig.mentors || [],
+      mapConfig.chests || [],
+      offset,
+      occupiedTiles
+    )
+  }
+
+  movables.length = 0
+  movables.push(
+    background,
+    ...boundaries,
+    foreground,
+    ...battleZones,
+    ...doorZones,
+    ...characters,
+    ...chests
+  )
+
+  if (window.syncViewportCamera) {
+    window.syncViewportCamera()
+  }
+}
+
+function isTileWalkable(col, row, occupiedTiles) {
+  if (
+    row < 1 ||
+    row >= collisionsMap.length - 1 ||
+    col < 1 ||
+    col >= (collisionsMap[0] ? collisionsMap[0].length - 1 : 69)
+  ) {
+    return false
+  }
+  if (collisionsMap[row][col] === 1025) return false
+  if (battleZonesMap[row] && battleZonesMap[row][col] === 1025) return false
+  if (occupiedTiles.has(`${col},${row}`)) return false
+  return true
+}
+
+function findWalkableTile(targetCol, targetRow, occupiedTiles) {
+  for (let radius = 0; radius <= 8; radius++) {
+    for (let dy = -radius; dy <= radius; dy++) {
+      for (let dx = -radius; dx <= radius; dx++) {
+        const cCol = targetCol + dx
+        const cRow = targetRow + dy
+        if (isTileWalkable(cCol, cRow, occupiedTiles)) {
+          occupiedTiles.add(`${cCol},${cRow}`)
+          return { col: cCol, row: cRow }
+        }
+      }
+    }
+  }
+  return { col: targetCol, row: targetRow }
+}
+
+function spawnEntitiesOnMap(mentorSpots, chestSpots, offset, occupiedTiles) {
+  mentorSpots.forEach((spot) => {
+    const tile = findWalkableTile(spot.col, spot.row, occupiedTiles)
+    const themeMeta =
+      window.Robolingo && window.Robolingo.THEMES[spot.theme]
+        ? window.Robolingo.THEMES[spot.theme]
+        : { spriteType: 'villager' }
+
+    const worldX = tile.col * Boundary.width + offset.x
+    const worldY = tile.row * Boundary.height + offset.y
+
+    const npc = new Character({
+      position: { x: worldX, y: worldY },
+      image: themeMeta.spriteType === 'oldMan' ? oldManImg : villagerImg,
+      frames: { max: 4, hold: 60 },
+      scale: 3,
+      animate: true,
+      dialogue: ['Hello! Ready to practice English?']
+    })
+    npc.themeKey = spot.theme
+    characters.push(npc)
+
+    boundaries.push(
+      new Boundary({
+        position: { x: worldX, y: worldY }
+      })
+    )
+  })
+
+  chestSpots.forEach((spot) => {
+    const tile = findWalkableTile(spot.col, spot.row, occupiedTiles)
+    const worldX = tile.col * Boundary.width + offset.x
+    const worldY = tile.row * Boundary.height + offset.y
+
+    chests.push({
+      ...spot,
+      position: { x: worldX, y: worldY },
+      width: Boundary.width,
+      height: Boundary.height
+    })
+
+    boundaries.push(
+      new Boundary({
+        position: { x: worldX, y: worldY }
+      })
+    )
+  })
+}
+
+function enterDoor(door) {
+  if (isTransitioning) return
+
+  let destinationMap = door.targetMap
+  let destinationSpawn = door.targetSpawn
+
+  if (destinationMap === 'return') {
+    if (returnPortal) {
+      destinationMap = returnPortal.mapId
+      destinationSpawn = { col: returnPortal.col, row: returnPortal.row }
+      returnPortal = null
+    } else {
+      destinationMap = door.fallbackMap || INITIAL_MAP
+    }
+  } else {
+    returnPortal = {
+      mapId: currentMapId,
+      col: door.col,
+      row: door.row + 1
+    }
+  }
+
+  const targetConfig = MAPS[destinationMap]
+  if (!targetConfig || (!targetConfig.useLegacyData && !targetConfig.matrix)) {
+    console.warn(`Mapa "${destinationMap}" ainda não tem matriz configurada.`)
+    return
+  }
+
+  isTransitioning = true
+  keys.w.pressed = false
+  keys.a.pressed = false
+  keys.s.pressed = false
+  keys.d.pressed = false
+  player.animate = false
+
+  gsap.to('#overlappingDiv', {
+    opacity: 1,
+    duration: 0.3,
+    onComplete() {
+      buildMap(destinationMap, destinationSpawn)
+      gsap.to('#overlappingDiv', {
+        opacity: 0,
+        duration: 0.3,
+        onComplete() {
+          isTransitioning = false
+        }
+      })
+    }
+  })
+}
+
+// ============================================================================
+// 4. CÂMERA, INTERAÇÕES E LOOP PRINCIPAL
+// ============================================================================
 window.syncViewportCamera = function () {
   canvas.width = window.innerWidth
   canvas.height = window.innerHeight
@@ -283,7 +633,6 @@ function drawInteractionHint(nearby) {
 function animate() {
   window.requestAnimationFrame(animate)
 
-  // Atualiza sprites personalizados do aluno
   if (window.Robolingo) {
     const customSprites = window.Robolingo.getCustomPlayerSprites(basePlayerSprites)
     if (customSprites) {
@@ -329,7 +678,9 @@ function animate() {
     window.Robolingo.drawPlayerCosmetics(c, player)
   }
 
-  foreground.draw()
+  if (hasForeground) {
+    foreground.draw()
+  }
   c.restore()
 
   const nearby = getNearbyEntity()
@@ -351,12 +702,30 @@ function animate() {
   let moving = true
   player.animate = false
 
-  if (battle.initiated || (window.Robolingo && window.Robolingo.isModalOpen())) {
+  if (
+    isTransitioning ||
+    battle.initiated ||
+    (window.Robolingo && window.Robolingo.isModalOpen())
+  ) {
     return
   }
 
-  // Encontro surpresa na grama alta
   if (keys.w.pressed || keys.a.pressed || keys.s.pressed || keys.d.pressed) {
+    for (let i = 0; i < doorZones.length; i++) {
+      const door = doorZones[i]
+      const overlapX =
+        Math.min(player.position.x + player.width, door.position.x + door.width) -
+        Math.max(player.position.x, door.position.x)
+      const overlapY =
+        Math.min(player.position.y + player.height, door.position.y + door.height) -
+        Math.max(player.position.y, door.position.y)
+
+      if (overlapX > 20 && overlapY > 20) {
+        enterDoor(door)
+        return
+      }
+    }
+
     for (let i = 0; i < battleZones.length; i++) {
       const battleZone = battleZones[i]
       const overlappingArea =
@@ -646,4 +1015,4 @@ addEventListener('click', () => {
 if (window.Robolingo) {
   window.Robolingo.init()
 }
-window.syncViewportCamera()
+buildMap(INITIAL_MAP)
