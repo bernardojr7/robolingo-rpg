@@ -13,32 +13,32 @@ const MAPS = {
   science_village: {
     imageSrc: './img/science_village.png',
     foregroundSrc: null,
-    defaultSpawn: { col: 20, row: 14 }, // Praça central abaixo da fonte
+    defaultSpawn: { col: 19, row: 14 }, // Praça central à esquerda da fonte
     matrix: [
       "########################################",
-      "########.......###...###################",
-      "########..............####........###.##",
-      "####......##..............#######.######",
-      "####....####.............######.##.#####",
-      "############..#####..###.##########.####",
-      "#####...###.....#####..#.###...####.####",
-      "####..######.....####..#.###111####.####", // '1' = Porta do Laboratório
-      "###...####.#...#.##....#..........#.####",
-      "##....####.#...#...22..#............####", // '2' = Casa superior
-      "####.##.#..#...####..#######...####.####",
-      "###.#####...........................####",
-      "##..###...#.##...........##.........####",
-      "##........######........####....#...####",
-      "##..###...######........####....##..####",
-      "###.###..####..#........##.......#..####",
-      "#######..####22#..........22.....#..####", // '2' = Casas inferiores
-      "#######......................###.#..####",
-      "##############.......###.#######.##.####",
-      "##################...###################",
-      "##################...###.###############",
-      "###############.........################",
-      "###############.........#######.########",
-      "################333#####################"  // '3' = Estrada para GraçaTown
+      "#################...####################",
+      "#################...####################",
+      "############........####################",
+      "############........####################",
+      "############..#####..###################",
+      "##...#######..#####..#####.......#######",
+      "##...#######..#####..#####..111..#######", // '1' = Porta do Laboratório
+      "##...#######..#####..#####.......#######",
+      "##...#######..#..22..#####.......#######", // '2' = Casa superior
+      "##...#######..###..#########...#########",
+      "##.................................#####", // Estrada principal + ponte
+      "##.................................#####", // Estrada principal + ponte
+      "##...#####....#.....###..#####....######", // Fonte sólida (cols 21-23)
+      "##...#####....#.....###..#####....######",
+      "##...#####....#..........#####....######",
+      "##########.###22#..........22###..######", // '2' = Casas inferiores
+      "##########.........................#####", // Calçada frontal livre
+      "#############..####...####..############", // Portões abertos abaixo das casas
+      "###################...##################",
+      "###################...##################",
+      "#################.......################",
+      "#################.......################",
+      "###################333##################"  // '3' = Estrada para GraçaTown
     ],
     doors: {
       '1': { targetMap: 'robotics', targetSpawn: { col: 9, row: 12 } },
@@ -46,11 +46,13 @@ const MAPS = {
       '3': { targetMap: 'gracatown', targetSpawn: { col: 19, row: 20 } }
     },
     mentors: [
-      { col: 16, row: 11, theme: 'greetings' },
-      { col: 23, row: 11, theme: 'travel' }
+      { col: 3, row: 9, theme: 'travel' },       // Gramado após a ponte à esquerda
+      { col: 13, row: 6, theme: 'greetings' },   // Jardim superior esquerdo
+      { col: 32, row: 9, theme: 'technology' }   // Pátio leste ao lado do laboratório
     ],
     chests: [
-      { col: 25, row: 12, id: 'chest_village_1' }
+      { col: 3, row: 14, id: 'chest_village_bridge' },
+      { col: 33, row: 15, id: 'chest_village_east' }
     ]
   },
 
@@ -128,38 +130,39 @@ const MAPS = {
     foregroundSrc: null,
     defaultSpawn: { col: 19, row: 20 },
     matrix: [
-  "########################################",
-  "##############################.#########",
-  "#########################............###",
-  "######......#############.####.####..###",
-  "##########..#.###########.####.####..###",
-  "##########..#####...#####.#....#.###.###",
-  "##########..######11###...#11###1....###",
-  "######........####..###..........#######",
-  "######...........................#######",
-  "########.##......................#######",
-  "########.##.#.#.......#.####.###########",
-  "#######...#.###..####.#.##.#.##...######",
-  "######....#.###..####.#..##.....#.######",
-  "######....#.##...####.#........##..#####",
-  "###############..####.#..2....2....#####",
-  "###############..####.###..........#####",
-  "##############.........########....#####",
-  "##############....................######",
-  "########.##.##.##...#####.#.#.###.######",
-  "#######.1..1...#....#####.#1.1.#...#####",
-  "#######........##...#####..........#####",
-  "#############.###...#####.........######",
-  "################.....###################",
-  "################......##################"
+      "########################################",
+      "##############################.#########",
+      "#########################............###",
+      "######......#############.####.####..###",
+      "##########..#.###########.####.####..###",
+      "##########..#####..######.#....#.###.###",
+      "##########..######11###...#11###1....###",
+      "######........####..###..........#######",
+      "######...........................#######",
+      "##########.##....................#######",
+      "##########.##.#.##......#.####.#########",
+      "##########.#...#.####.####.#.##.#.##.###",
+      "######....#.####.####.#..##.....#.######",
+      "######....#.##.#.####.#.......##..######",
+      "################.####.#..2....2....#####",
+      "################.####.###..........#####",
+      "###############........#################",
+      "##############............#######.######",
+      "########.##.##.##...#####.#.#.###.######",
+      "#######.1..1...#....#####.#1.1.#...#####",
+      "#######........##...#####..........#####",
+      "#############.###...########....########",
+      "################.....###################",
+      "################PPPPPP##################"
     ],
     doors: {
       '1': { targetMap: 'robotics', targetSpawn: { col: 9, row: 12 } },
       '2': { targetMap: 'arcane_library', targetSpawn: { col: 9, row: 12 } },
-      'P': { targetMap: 'science_village', targetSpawn: { col: 17, row: 21 } }
+      'P': { targetMap: 'science_village', targetSpawn: { col: 20, row: 21 } }
     },
     mentors: [
-      { col: 19, row: 8, theme: 'nature' }
+      { col: 14, row: 8, theme: 'nature' },
+      { col: 26, row: 12, theme: 'work' }
     ],
     chests: [
       { col: 24, row: 8, id: 'chest_graca_1' }
@@ -387,9 +390,16 @@ function buildMap(mapId, customSpawn = null) {
       battleZonesMap.push(bRow)
     }
 
+    // Garante que o ponto de chegada seja caminhável e não encoste os pés (68px) em parede abaixo
+    const safeSpawn = findWalkableTile(spawnTile.col, spawnTile.row, occupiedTiles)
+    const hasWallBelow =
+      collisionsMap[safeSpawn.row + 1] &&
+      collisionsMap[safeSpawn.row + 1][safeSpawn.col] === 1025
+    const footClearanceY = hasWallBelow ? -22 : 0
+
     const offset = {
-      x: player.position.x - spawnTile.col * Boundary.width,
-      y: player.position.y - spawnTile.row * Boundary.height
+      x: player.position.x - safeSpawn.col * Boundary.width,
+      y: player.position.y - safeSpawn.row * Boundary.height - footClearanceY
     }
 
     background.position = { x: offset.x, y: offset.y }
@@ -408,7 +418,6 @@ function buildMap(mapId, customSpawn = null) {
       dz.position.y += offset.y
     })
 
-    occupiedTiles.add(`${spawnTile.col},${spawnTile.row}`)
     spawnEntitiesOnMap(
       mapConfig.mentors || [],
       mapConfig.chests || [],
@@ -465,12 +474,22 @@ function findWalkableTile(targetCol, targetRow, occupiedTiles) {
 }
 
 function spawnEntitiesOnMap(mentorSpots, chestSpots, offset, occupiedTiles) {
-  mentorSpots.forEach((spot) => {
+  const availableThemes =
+    window.Robolingo && window.Robolingo.THEMES
+      ? Object.keys(window.Robolingo.THEMES)
+      : []
+
+  mentorSpots.forEach((spot, index) => {
     const tile = findWalkableTile(spot.col, spot.row, occupiedTiles)
+    const resolvedThemeKey =
+      availableThemes.length > 0 && !window.Robolingo.THEMES[spot.theme]
+        ? availableThemes[index % availableThemes.length]
+        : spot.theme
+
     const themeMeta =
-      window.Robolingo && window.Robolingo.THEMES[spot.theme]
-        ? window.Robolingo.THEMES[spot.theme]
-        : { spriteType: 'villager' }
+      window.Robolingo && window.Robolingo.THEMES[resolvedThemeKey]
+        ? window.Robolingo.THEMES[resolvedThemeKey]
+        : { spriteType: index % 2 === 1 ? 'oldMan' : 'villager' }
 
     const worldX = tile.col * Boundary.width + offset.x
     const worldY = tile.row * Boundary.height + offset.y
@@ -483,7 +502,7 @@ function spawnEntitiesOnMap(mentorSpots, chestSpots, offset, occupiedTiles) {
       animate: true,
       dialogue: ['Hello! Ready to practice English?']
     })
-    npc.themeKey = spot.theme
+    npc.themeKey = resolvedThemeKey
     characters.push(npc)
 
     boundaries.push(
